@@ -1,26 +1,81 @@
 [package]
-name = "my-game"
-version = "0.1.0"
 edition = "2021"
+name    = "blood-oath"
+publish = false
+version = "0.1.0"
 
 [workspace]
-members = [
-    "launchers/wasm",
-    "launchers/native",
-]
+members = ["launchers/wasm", "launchers/native"]
 
 [[bin]]
-name="native-launcher"
-path="launchers/native/src/main.rs"
+name = "native-launcher"
+path = "launchers/native/src/main.rs"
+
+[profile.dev.package."*"]
+opt-level = 3
+
+[profile.dev]
+opt-level = 1
 
 # Optimizations for WASM
 [profile.release]
-panic = 'abort'
 codegen-units = 1
-opt-level = 'z'
-lto = true
+lto           = true
+opt-level     = 'z'
+panic         = 'abort'
+
+[features]
+bundled     = ["bevy_embedded_assets"]
+debug-graph = ["bevy_mod_debugdump"]
+default     = ["dev"]
+dev         = ["bevy/dynamic"]
+hot         = ["bevy/filesystem_watcher"]
+release     = ["bundled", "tracing/release_max_level_warn"]
+trace       = ["bevy/trace"]
+tracy       = ["bevy/trace", "bevy/trace_tracy"]
 
 [dependencies]
-bevy = "0.8.1"
-image = "0.24.3"
-winit = "0.26.1"
+bevy = { version = "0.8", default-features = false, features = [
+  "bevy_asset",
+  "bevy_winit",
+  "render",
+  "png",
+  "x11",
+] }
+
+bevy_asset_loader    = { version = "0.12", features = ["stageless", "2d"] }
+bevy_ecs_ldtk        = { version = "0.4", features = ["atlas"] }
+bevy_ecs_tilemap     = { version = "0.7", features = ["atlas"] }
+bevy_embedded_assets = { version = "0.4", optional = true }
+bevy_mod_debugdump   = { version = "0.5", optional = true, default-features = false }
+iyes_loopless        = { version = "0.7" }
+
+# bracket-lib
+bracket-geometry = { git = "https://github.com/lecoqjacob/bracket-lib", branch = "custom", features = [
+  'serde',
+  'bevy',
+] }
+bracket-noise = { git = "https://github.com/lecoqjacob/bracket-lib", branch = "custom" }
+bracket-pathfinding = { git = "https://github.com/lecoqjacob/bracket-lib", branch = "custom" }
+bracket-random = { git = "https://github.com/lecoqjacob/bracket-lib", branch = "custom", features = [
+  'serde',
+] }
+bracket-rex = { git = "https://github.com/lecoqjacob/bracket-lib", branch = "custom" }
+
+# Utility
+bitflags      = "1"
+bitvec        = { version = "1", features = ["serde"] }
+lazy_static   = "1"
+ordered-float = "3"
+parking_lot   = "0.12"
+serde         = { version = "1", features = ["derive"] }
+tiled         = "0.9"
+tracing       = "0.1"
+
+# keep the following in sync with Bevy's dependencies
+anyhow = "1"
+image  = { version = "0.24", default-features = false }
+winit  = { version = "0.26.0", default-features = false }
+
+[build-dependencies]
+embed-resource = "1.4"

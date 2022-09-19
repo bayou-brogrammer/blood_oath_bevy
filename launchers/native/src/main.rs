@@ -1,7 +1,6 @@
 use std::io::Cursor;
 
 use bevy::{prelude::*, window::WindowId, winit::WinitWindows};
-use image;
 use winit::window::Icon;
 
 fn set_window_icon(windows: NonSend<WinitWindows>) {
@@ -24,7 +23,7 @@ fn set_window_icon(windows: NonSend<WinitWindows>) {
 }
 
 fn main() {
-    let mut app = my_game::app();
+    let mut app = blood_oath::app();
 
     info!("Starting launcher: Native");
     app.add_startup_system(set_window_icon);
