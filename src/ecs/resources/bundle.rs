@@ -1,10 +1,11 @@
 use crate::prelude::*;
 use std::collections::HashSet;
 
-#[derive(Bundle, Component)]
+#[derive(Bundle)]
 pub struct PlayerBundle {
     pub tag: Player,
     pub fov: FieldOfView,
+    pub light: LightSource,
 
     #[bundle]
     pub render: RenderableBundle,
@@ -12,16 +13,17 @@ pub struct PlayerBundle {
 
 impl PlayerBundle {
     pub fn new(pos: Point, atlas: Handle<TextureAtlas>) -> Self {
-        let idx = get_tile_index(GameSymbol::Player) as usize;
+        let idx = get_tile_index(TileSets::Ascii, GameSymbol::Player) as usize;
         Self {
             tag: Player,
-            fov: FieldOfView { visible_tiles: HashSet::new(), radius: 10 },
+            light: LightSource { color: Color::WHITE, range: 8 },
+            fov: FieldOfView { visible_tiles: HashSet::new(), radius: 8 },
             render: RenderableBundle::new("Player", pos, atlas, idx, true),
         }
     }
 }
 
-#[derive(Bundle, Component)]
+#[derive(Bundle)]
 pub struct RenderableBundle {
     pub name: Name,
     pub position: Position,
@@ -49,6 +51,30 @@ impl RenderableBundle {
                 sprite: get_sprite(texture_index),
                 ..default()
             },
+        }
+    }
+}
+
+#[derive(Bundle)]
+pub struct EnemyBundle {
+    pub tag: Enemy,
+    pub fov: FieldOfView,
+    pub light: LightSource,
+    pub blocks: BlocksMovement,
+
+    #[bundle]
+    pub render: RenderableBundle,
+}
+
+impl EnemyBundle {
+    pub fn new(pt: Point, atlas: Handle<TextureAtlas>) -> Self {
+        let idx = get_tile_index(TileSets::Ascii, GameSymbol::Enemy) as usize;
+        Self {
+            blocks: BlocksMovement,
+            tag: Enemy,
+            light: LightSource { color: Color::WHITE, range: 8 },
+            fov: FieldOfView { visible_tiles: HashSet::new(), radius: 5 },
+            render: RenderableBundle::new("Enemy", pt, atlas, idx, true),
         }
     }
 }

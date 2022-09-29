@@ -48,12 +48,11 @@ fn view() -> Html {
 }
 
 fn main() {
-    // Mount the DOM
-    yew::start_app::<Root>();
+    if let Some(mut app) = blood_oath::app() {
+        // Mount the DOM
+        yew::start_app::<Root>();
 
-    // Start the Bevy App
-    let mut app = blood_oath::app();
-
-    info!("Starting launcher: WASM");
-    app.run();
+        info!("Starting launcher: WASM");
+        app.run();
+    }
 }

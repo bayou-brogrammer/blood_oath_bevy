@@ -8,19 +8,12 @@ pub struct FontAssets {
 
 #[derive(AssetCollection)]
 pub struct TextureAssets {
-    #[asset(path = "textures/colored_transparent_packed.png")]
-    pub tileset: Handle<Image>,
+    #[asset(path = "textures/ascii_tilesets/ascii_plus.png")]
+    pub ascii_tileset: Handle<Image>,
 
-    #[asset(texture_atlas(
-        tile_size_x = 16.,
-        tile_size_y = 16.,
-        columns = 48,
-        rows = 22,
-        // padding_x = 1.,
-        // padding_y = 1.
-    ))]
-    #[asset(path = "textures/colored_transparent_packed.png")]
-    pub tilset_atlas: Handle<TextureAtlas>,
+    #[asset(texture_atlas(tile_size_x = 8., tile_size_y = 8., columns = 32, rows = 31,))]
+    #[asset(path = "textures/ascii_tilesets/ascii_plus.png")]
+    pub ascii_tileset_atlas: Handle<TextureAtlas>,
 }
 
 #[derive(AssetCollection)]
@@ -29,6 +22,8 @@ pub struct MapAssets {}
 pub struct LoadingPlugin;
 impl Plugin for LoadingPlugin {
     fn build(&self, app: &mut App) {
+        app.init_resource::<RandomNumbers>();
+
         app.add_loading_state(
             LoadingState::new(GameState::Loading)
                 .with_collection::<FontAssets>()

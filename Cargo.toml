@@ -29,13 +29,13 @@ bundled     = ["bevy_embedded_assets"]
 debug-graph = ["bevy_mod_debugdump"]
 default     = ["dev"]
 dev         = ["bevy/dynamic"]
-hot         = ["bevy/filesystem_watcher"]
-release     = ["bundled", "tracing/release_max_level_warn"]
-trace       = ["bevy/trace"]
-tracy       = ["bevy/trace", "bevy/trace_tracy"]
+# hot         = ["bevy/filesystem_watcher"]
+release = ["bundled", "tracing/release_max_level_warn"]
+trace   = ["bevy/trace"]
+tracy   = ["bevy/trace", "bevy/trace_tracy"]
 
 [dependencies]
-bevy = { version = "0.8", default-features = false, features = [
+bevy = { version = "0.8.1", default-features = false, features = [
   "bevy_asset",
   "bevy_winit",
   "render",
@@ -44,23 +44,21 @@ bevy = { version = "0.8", default-features = false, features = [
 ] }
 
 bevy_asset_loader    = { version = "0.12", features = ["stageless", "2d"] }
-bevy_ecs_ldtk        = { version = "0.4", features = ["atlas"] }
 bevy_ecs_tilemap     = { version = "0.7", features = ["atlas"] }
 bevy_embedded_assets = { version = "0.4", optional = true }
 bevy_mod_debugdump   = { version = "0.5", optional = true, default-features = false }
 iyes_loopless        = { version = "0.7" }
 
 # bracket-lib
-bracket-geometry = { git = "https://github.com/lecoqjacob/bracket-lib", branch = "custom", features = [
-  'serde',
-  'bevy',
-] }
-bracket-noise = { git = "https://github.com/lecoqjacob/bracket-lib", branch = "custom" }
-bracket-pathfinding = { git = "https://github.com/lecoqjacob/bracket-lib", branch = "custom" }
-bracket-random = { git = "https://github.com/lecoqjacob/bracket-lib", branch = "custom", features = [
-  'serde',
-] }
-bracket-rex = { git = "https://github.com/lecoqjacob/bracket-lib", branch = "custom" }
+bracket-geometry    = { git = "https://github.com/amethyst/bracket-lib", features = ['serde'] }
+bracket-noise       = { git = "https://github.com/amethyst/bracket-lib" }
+bracket-pathfinding = { git = "https://github.com/amethyst/bracket-lib" }
+bracket-random      = { git = "https://github.com/amethyst/bracket-lib", features = ['serde'] }
+bracket-rex         = { git = "https://github.com/amethyst/bracket-lib" }
+
+# UI
+bevy-inspector-egui = "0.13"
+bevy_egui           = "0.16"
 
 # Utility
 bitflags      = "1"
@@ -69,7 +67,6 @@ lazy_static   = "1"
 ordered-float = "3"
 parking_lot   = "0.12"
 serde         = { version = "1", features = ["derive"] }
-tiled         = "0.9"
 tracing       = "0.1"
 
 # keep the following in sync with Bevy's dependencies

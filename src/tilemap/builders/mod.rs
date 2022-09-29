@@ -4,46 +4,49 @@ mod rooms;
 pub use rooms::*;
 
 trait MapArchitect {
-    fn build(&mut self, width: i32, height: i32, depth: i32) -> MapBuilder;
+    fn build(
+        &mut self,
+        width: i32,
+        height: i32,
+        depth: i32,
+        rng: &RandomNumbers,
+    ) -> MapBuilder;
 }
 
 pub struct MapBuilder {
     pub map: TileMap,
-    rooms: Vec<Rect>,
+    pub rooms: Vec<Rect>,
     pub player_start: Position,
     pub spawn_list: Vec<Position>,
 }
 
 impl MapBuilder {
-    pub fn new(width: i32, height: i32) -> Self {
+    pub fn new(width: i32, height: i32, rng: &RandomNumbers) -> Self {
         #[allow(clippy::match_single_binding)]
-        let mut architect: Box<dyn MapArchitect> = match crate::rng::range(0, 1) {
+        let mut architect: Box<dyn MapArchitect> = match rng.range(0, 1) {
             _ => Box::new(RoomsArchitect {}),
         };
 
-        architect.build(width, height, 0)
+        architect.build(width, height, 0, rng)
     }
 
     fn fill(&mut self, tile: TileType) {
         self.map.tiles.iter_mut().for_each(|t| t.tile_type = tile);
     }
 
-    fn build_random_rooms(&mut self) {
-        const NUM_ROOMS: usize = 20;
+    fn build_random_rooms(&mut self, rng: &RandomNumbers) {
+        const NUM_ROOMS: usize = 30;
+        const MIN_SIZE: i32 = 6;
+        const MAX_SIZE: i32 = 10;
 
         while self.rooms.len() < NUM_ROOMS {
-            let room = Rect::with_size(
-                crate::rng::range(1, self.map.width as u32 - 10),
-                crate::rng::range(1, self.map.height as u32 - 10),
-                crate::rng::range(2, 10),
-                crate::rng::range(2, 10),
-            );
-            let mut overlap = false;
-            for r in self.rooms.iter() {
-                if r.intersect(&room) {
-                    overlap = true;
-                }
-            }
+            let w = rng.range(MIN_SIZE, MAX_SIZE);
+            let h = rng.range(MIN_SIZE, MAX_SIZE);
+            let x = rng.roll_dice(1, self.map.width - w - 1) - 1;
+            let y = rng.roll_dice(1, self.map.height - h - 1) - 1;
+
+            let room = Rect::with_size(x, y, w, h);
+            let overlap = self.rooms.iter().any(|r| r.intersect(&room));
             if !overlap {
                 room.for_each(|p| {
                     if p.x > 0 && p.x < self.map.width && p.y > 0 && p.y < self.map.height {
@@ -75,7 +78,7 @@ impl MapBuilder {
         }
     }
 
-    fn build_corridors(&mut self) {
+    fn build_corridors(&mut self, rng: &RandomNumbers) {
         let mut rooms = self.rooms.clone();
         rooms.sort_by(|a, b| a.center().x.cmp(&b.center().x));
 
@@ -83,7 +86,7 @@ impl MapBuilder {
             let prev = rooms[i - 1].center();
             let new = room.center();
 
-            if crate::rng::range(0, 2) == 1 {
+            if rng.range(0, 2) == 1 {
                 self.apply_horizontal_tunnel(prev.x, new.x, prev.y);
                 self.apply_vertical_tunnel(prev.y, new.y, new.x);
             } else {
@@ -98,11 +101,15 @@ impl MapBuilder {
 // Builder
 //////////////////////////////////////////////////////////////////////////////////////////
 
-fn setup_tilemap(mut commands: Commands, textures: Res<TextureAssets>) {
+fn setup_tilemap(
+    mut commands: Commands,
+    rng: Res<RandomNumbers>,
+    textures: Res<TextureAssets>,
+) {
     println!("Setting up tilemap");
 
-    let mb = MapBuilder::new(80, 50);
-    mb.map.spawn(&mut commands, textures.tileset.clone());
+    let mb = MapBuilder::new(60, 60, &rng);
+    mb.map.spawn(&mut commands, &rng, textures.ascii_tileset.clone());
 
     commands.insert_resource(mb.map.clone());
     commands.insert_resource(mb);

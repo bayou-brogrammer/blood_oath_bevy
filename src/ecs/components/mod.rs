@@ -14,6 +14,12 @@ pub struct CameraFollow(pub Entity);
 
 #[derive(Default, Component)]
 pub struct FieldOfView {
-    pub radius: u32,
+    pub radius: i32,
     pub visible_tiles: HashSet<Point>,
+}
+
+#[derive(Component, Serialize, Deserialize, Clone)]
+pub struct LightSource {
+    pub color: Color,
+    pub range: i32,
 }

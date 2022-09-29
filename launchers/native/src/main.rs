@@ -23,9 +23,8 @@ fn set_window_icon(windows: NonSend<WinitWindows>) {
 }
 
 fn main() {
-    let mut app = blood_oath::app();
-
-    info!("Starting launcher: Native");
-    app.add_startup_system(set_window_icon);
-    app.run();
+    if let Some(mut app) = blood_oath::app() {
+        info!("Starting launcher: Native");
+        app.add_startup_system(set_window_icon).run();
+    }
 }

@@ -27,5 +27,7 @@ pub fn player_input(
 
         // reset keyboard, bevys bug when changing states
         keys.reset(key);
+
+        commands.insert_resource(NextState(InGameState::ResolveActions));
     }
 }

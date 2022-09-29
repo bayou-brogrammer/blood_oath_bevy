@@ -1,6 +1,6 @@
 use super::*;
 
-pub const TILE_SIZE: f32 = 16.0;
+pub const TILE_SIZE: f32 = 8.0;
 
 #[derive(Debug, PartialEq, Eq, Hash, Copy, Clone, Serialize, Deserialize)]
 pub enum TileType {
@@ -8,6 +8,7 @@ pub enum TileType {
     Floor,
     DownStairs,
     UpStairs,
+    Void,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -28,7 +29,7 @@ impl GameTile {
 
     pub fn is_opaque(&self) -> bool {
         matches!(self.tile_type, TileType::Wall)
-            && !self.flags.contains(TileFlags::BLOCKS_VISION)
+            || self.flags.contains(TileFlags::BLOCKS_VISION)
     }
 
     pub fn cost(&self) -> f32 {
