@@ -80,7 +80,7 @@ impl Solver {
         neighbors
     }
 
-    pub fn iteration(&mut self, map: &mut Map, rng: &mut RandomNumbers) -> bool {
+    pub fn iteration(&mut self, map: &mut TileMap, rng: &mut RandomNumbers) -> bool {
         if self.remaining.is_empty() {
             return true;
         }
@@ -221,7 +221,8 @@ impl Solver {
                 for y in top_y..bottom_y {
                     for x in left_x..right_x {
                         let mapidx = map.xy_idx(x, y);
-                        let tile = self.constraints[possible_options[new_chunk_idx as usize]].pattern[i];
+                        let tile = self.constraints[possible_options[new_chunk_idx as usize]]
+                            .pattern[i];
                         map.tiles[mapidx] = tile;
                         i += 1;
                     }

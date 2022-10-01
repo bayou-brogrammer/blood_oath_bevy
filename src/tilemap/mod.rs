@@ -1,13 +1,16 @@
+use bitflags::bitflags;
+
 use crate::prelude::*;
+use grid_2d::Grid;
+use grid_2d::Size;
 
 mod bitgrid;
-mod builders;
+mod map_builder;
 mod spatial;
 mod tile;
 
-use bitflags::bitflags;
 pub use bitgrid::*;
-pub use builders::*;
+pub use map_builder::*;
 pub use spatial::*;
 pub use tile::*;
 
@@ -21,18 +24,17 @@ bitflags! {
     }
 }
 
-#[derive(Debug, Default, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TileMap {
     pub depth: i32,
-    pub width: i32,
-    pub height: i32,
+    pub size: Size,
     pub name: String,
 
     pub visible: BitGrid,
     pub revealed: BitGrid,
-    pub tiles: Vec<GameTile>,
-
-    pub light: Vec<Color>,
+    pub opaque: BitGrid,
+    pub blocked: BitGrid,
+    pub tiles: Grid<TileType>,
 
     #[serde(skip_serializing)]
     #[serde(skip_deserializing)]
@@ -40,114 +42,85 @@ pub struct TileMap {
 }
 
 impl TileMap {
-    pub fn new<S: ToString>(width: i32, height: i32, depth: i32, name: S) -> Self {
-        let size = TilemapSize { x: width as u32, y: height as u32 };
+    pub fn new<S: ToString>(size: Size, depth: i32, name: S) -> Self {
         let map_tile_count = size.count();
 
         Self {
+            size,
             depth,
-            width,
-            height,
             name: name.to_string(),
 
-            visible: BitGrid::new(width, height),
-            revealed: BitGrid::new(width, height),
+            visible: BitGrid::new(size),
+            revealed: BitGrid::new(size),
 
-            // opaque: BitGrid::new(width, height),
-            // blocked: BitGrid::new(width, height),
+            opaque: BitGrid::new(size),
+            blocked: BitGrid::new(size),
             tile_content: vec![Vec::new(); map_tile_count],
-            tiles: vec![GameTile::new(TileType::Wall); map_tile_count],
-            light: vec![Color::BLACK; map_tile_count],
+            tiles: Grid::new_fn(size, |_| TileType::Wall),
         }
     }
 
-    #[inline]
-    fn tiletype(&self, pt: Point) -> TileType {
-        self.tiles[self.point2d_to_index(pt)].tile_type
+    pub fn width(&self) -> i32 {
+        self.size.width() as i32
+    }
+
+    pub fn height(&self) -> i32 {
+        self.size.height() as i32
+    }
+
+    pub fn xy_idx(&self, x: i32, y: i32) -> usize {
+        self.coord_to_index(Coord::new(x, y))
+    }
+
+    /// Convert a Point (x/y) to an array index. Defaults to an index based on an array
+    /// strided X first.
+    pub fn coord_to_index(&self, coord: Coord) -> usize {
+        let bounds = self.dimensions();
+        ((coord.y * bounds.x) + coord.x)
+            .try_into()
+            .expect("Not a valid usize. Did something go negative?")
+    }
+
+    /// Convert an array index to a point. Defaults to an index based on an array
+    /// strided X first.
+    pub fn index_to_coord(&self, idx: usize) -> Coord {
+        let bounds = self.dimensions();
+        let w: usize =
+            bounds.x.try_into().expect("Not a valid usize. Did something go negative?");
+        Coord::new((idx % w) as i32, (idx / w) as i32)
+    }
+
+    pub fn in_bounds(&self, coord: Coord) -> bool {
+        self.size.is_valid(coord)
     }
 
     #[allow(dead_code)]
     #[inline]
-    pub fn try_idx(&self, pt: Point) -> Option<usize> {
-        if !self.in_bounds(pt) {
+    pub fn try_idx(&self, coord: Coord) -> Option<usize> {
+        if !self.in_bounds(coord) {
             None
         } else {
-            Some(self.point2d_to_index(pt))
+            Some(self.coord_to_index(coord))
         }
+    }
+
+    pub fn clear(&mut self) {
+        self.clear_blocked();
+        self.clear_opaque();
+        self.tile_content.iter_mut().for_each(|v| v.clear());
     }
 
     // checks if it is physically possible (ie no wall or physical object)
-    pub fn can_enter_tile(&self, pt: Point) -> bool {
-        let idx = self.point2d_to_index(pt);
-        self.in_bounds(pt) && !self.is_blocked(idx)
+    pub fn can_enter_tile(&self, coord: Coord) -> bool {
+        let idx = self.coord_to_index(coord);
+        self.in_bounds(coord) && !self.is_blocked(idx)
     }
 
-    pub fn texture_for_tiletype(&self, tile_pos: TilePos, rng: &RandomNumbers) -> TileTexture {
-        let tile_type = self.tiletype(tile_pos.to_point());
-        let index = match tile_type {
-            TileType::Floor => get_floor_tile(TileSets::Ascii),
-            TileType::Wall => get_wall_tile(TileSets::Ascii),
-            TileType::DownStairs => todo!(),
-            TileType::UpStairs => todo!(),
-            _ => 0,
-        };
-
-        TileTexture(index as u32)
-    }
-
-    pub fn spawn(
-        &self,
-        commands: &mut Commands,
-        rng: &RandomNumbers,
-        texture_handle: Handle<Image>,
-    ) -> Entity {
-        let tilemap_entity = commands.spawn().id();
-        let size = TilemapSize { x: self.width as u32, y: self.height as u32 };
-        let mut tile_storage = TileStorage::empty(size);
-
-        for x in 0..self.width as u32 {
-            for y in 0..self.height as u32 {
-                let tile_pos = TilePos { x, y };
-                let tile_texture = self.texture_for_tiletype(tile_pos, rng);
-
-                let tile_entity = commands
-                    .spawn()
-                    .insert_bundle(TileBundle {
-                        position: tile_pos,
-                        tilemap_id: TilemapId(tilemap_entity),
-                        texture: tile_texture,
-                        visible: TileVisible(false),
-                        ..Default::default()
-                    })
-                    .id();
-                tile_storage.set(&tile_pos, Some(tile_entity));
-            }
-        }
-
-        let tile_size = TilemapTileSize { x: TILE_SIZE, y: TILE_SIZE };
-
-        commands.entity(tilemap_entity).insert_bundle(TilemapBundle {
-            size,
-            tile_size,
-            storage: tile_storage,
-            texture: TilemapTexture(texture_handle),
-            transform: Transform::from_xyz(0.0, 0.0, 0.0),
-            grid_size: TilemapGridSize { x: TILE_SIZE, y: TILE_SIZE },
-            ..Default::default()
-        });
-
-        tilemap_entity
-    }
-
-    pub fn wall_or_oob(&self, x: i32, y: i32) -> bool {
-        self.in_bounds(Point::new(x, y)) && self.tiletype(Point::new(x, y)) == TileType::Wall
-    }
-
-    fn valid_exit(&self, loc: Point, delta: Point) -> Option<usize> {
+    fn valid_exit(&self, loc: Coord, delta: Coord) -> Option<usize> {
         let destination = loc + delta;
         if self.in_bounds(destination) {
             if self.can_enter_tile(destination) {
-                let idx = self.point2d_to_index(destination);
+                let idx = self.coord_to_index(destination);
                 Some(idx)
             } else {
                 None
@@ -160,11 +133,7 @@ impl TileMap {
 
 impl Algorithm2D for TileMap {
     fn dimensions(&self) -> Point {
-        Point::new(self.width, self.height)
-    }
-
-    fn in_bounds(&self, pos: Point) -> bool {
-        pos.x >= 0 && pos.x < self.width as i32 && pos.y >= 0 && pos.y < self.height as i32
+        self.size.to_point()
     }
 }
 
@@ -184,28 +153,21 @@ impl BaseMap for TileMap {
 
     fn get_available_exits(&self, idx: usize) -> SmallVec<[(usize, f32); 10]> {
         let mut exits = SmallVec::new();
-        let location = self.index_to_point2d(idx);
-        let tt = &self.tiles[idx];
+        let location = self.index_to_coord(idx);
+        let tt = &self.tiles.get_index_checked(idx);
 
         // Cardinals
-        if let Some(idx) = self.valid_exit(location, Point::new(-1, 0)) { exits.push((idx, tt.cost())) }
-        if let Some(idx) = self.valid_exit(location, Point::new(1, 0)) { exits.push((idx, tt.cost())) }
-        if let Some(idx) = self.valid_exit(location, Point::new(0, -1)) { exits.push((idx, tt.cost())) }
-        if let Some(idx) = self.valid_exit(location, Point::new(0, 1)) { exits.push((idx, tt.cost())) }
+        if let Some(idx) = self.valid_exit(location, Coord::new(-1, 0)) { exits.push((idx, tt.cost())) }
+        if let Some(idx) = self.valid_exit(location, Coord::new(1, 0)) { exits.push((idx, tt.cost())) }
+        if let Some(idx) = self.valid_exit(location, Coord::new(0, -1)) { exits.push((idx, tt.cost())) }
+        if let Some(idx) = self.valid_exit(location, Coord::new(0, 1)) { exits.push((idx, tt.cost())) }
 
         // Diagonals
-        if let Some(idx) = self.valid_exit(location, Point::new(-1, -1)) { exits.push((idx, tt.cost())) }
-        if let Some(idx) = self.valid_exit(location, Point::new(1, -1)) { exits.push((idx, tt.cost())) }
-        if let Some(idx) = self.valid_exit(location, Point::new(-1, 1)) { exits.push((idx, tt.cost())) }
-        if let Some(idx) = self.valid_exit(location, Point::new(1, 1)) { exits.push((idx, tt.cost())) }
+        if let Some(idx) = self.valid_exit(location, Coord::new(-1, -1)) { exits.push((idx, tt.cost())) }
+        if let Some(idx) = self.valid_exit(location, Coord::new(1, -1)) { exits.push((idx, tt.cost())) }
+        if let Some(idx) = self.valid_exit(location, Coord::new(-1, 1)) { exits.push((idx, tt.cost())) }
+        if let Some(idx) = self.valid_exit(location, Coord::new(1, 1)) { exits.push((idx, tt.cost())) }
 
         exits
-    }
-}
-
-pub struct MapPlugin;
-impl Plugin for MapPlugin {
-    fn build(&self, app: &mut App) {
-        app.add_plugin(MapBuilderPlugin);
     }
 }

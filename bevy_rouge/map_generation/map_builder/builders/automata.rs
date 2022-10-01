@@ -30,7 +30,7 @@ impl CellularAutomataArchitect {
 }
 
 impl CellularAutomataArchitect {
-    fn random_noise_map(&mut self, map: &mut Map, rng: &mut RandomNumbers) {
+    fn random_noise_map(&mut self, map: &mut TileMap, rng: &mut RandomNumbers) {
         map.tiles.iter_mut().for_each(|t| {
             let roll = rng.range(0, 100);
             if roll > 55 {
@@ -45,7 +45,9 @@ impl CellularAutomataArchitect {
         let mut neighbors = 0;
         for iy in -1..=1 {
             for ix in -1..=1 {
-                if !(ix == 0 && iy == 0) && map.tiles[map.xy_idx(x + ix, y + iy)] == TileType::Wall {
+                if !(ix == 0 && iy == 0)
+                    && map.tiles[map.xy_idx(x + ix, y + iy)] == TileType::Wall
+                {
                     neighbors += 1;
                 }
             }
@@ -54,7 +56,7 @@ impl CellularAutomataArchitect {
         neighbors
     }
 
-    fn iteration(&mut self, map: &mut Map) {
+    fn iteration(&mut self, map: &mut TileMap) {
         let mut new_tiles = map.tiles.clone();
         for y in 1..map.height - 1 {
             for x in 1..map.width - 1 {

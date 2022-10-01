@@ -1,10 +1,7 @@
 use crate::prelude::*;
 
 mod macros;
-pub mod tileset;
-
 pub use macros::*;
-pub use tileset::*;
 
 pub fn get_sprite(index: usize) -> TextureAtlasSprite {
     TextureAtlasSprite::new(index)
@@ -24,6 +21,11 @@ pub fn pt_spritecoords(pos: Point) -> (f32, f32) {
     (x, y)
 }
 
+///////////////////
+/// To Point
+///////////////////
+use grid_2d::{Coord, Size};
+
 pub trait ToPoint {
     fn to_point(&self) -> Point;
 }
@@ -31,5 +33,30 @@ pub trait ToPoint {
 impl ToPoint for TilePos {
     fn to_point(&self) -> Point {
         Point::new(self.x, self.y)
+    }
+}
+
+impl ToPoint for Coord {
+    fn to_point(&self) -> Point {
+        Point::new(self.x, self.y)
+    }
+}
+
+impl ToPoint for Size {
+    fn to_point(&self) -> Point {
+        self.to_coord().unwrap().to_point()
+    }
+}
+
+///////////////////
+/// To Coord
+///////////////////
+pub trait ToCoord {
+    fn to_coord(&self) -> Coord;
+}
+
+impl ToCoord for Point {
+    fn to_coord(&self) -> Coord {
+        Coord::new(self.x, self.y)
     }
 }

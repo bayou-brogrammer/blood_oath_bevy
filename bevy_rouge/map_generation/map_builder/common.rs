@@ -10,7 +10,7 @@ pub enum Symmetry {
 }
 
 impl MapBuilder {
-    pub fn apply_room_to_map(&self, map: &mut Map, room: &Rect) {
+    pub fn apply_room_to_map(&self, map: &mut TileMap, room: &Rect) {
         room.for_each(|pt| {
             let idx = map.point2d_to_index(pt);
             map.tiles[idx] = TileType::Floor;

@@ -4,32 +4,21 @@ pub const TILE_SIZE: f32 = 8.0;
 
 #[derive(Debug, PartialEq, Eq, Hash, Copy, Clone, Serialize, Deserialize)]
 pub enum TileType {
-    Wall,
-    Floor,
     DownStairs,
     UpStairs,
-    Void,
+
+    Floor,
+    Wall,
+    Door,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct GameTile {
-    pub flags: TileFlags,
-    pub tile_type: TileType,
-}
-
-impl GameTile {
-    pub fn new(tile_type: TileType) -> Self {
-        Self { flags: TileFlags::empty(), tile_type }
-    }
-
-    pub fn walkable(&self) -> bool {
-        matches!(self.tile_type, TileType::Floor | TileType::DownStairs | TileType::UpStairs)
-            && !self.flags.contains(TileFlags::BLOCKS_MOVEMENT)
+impl TileType {
+    pub fn is_walkable(&self) -> bool {
+        matches!(self, TileType::Floor | TileType::DownStairs | TileType::UpStairs)
     }
 
     pub fn is_opaque(&self) -> bool {
-        matches!(self.tile_type, TileType::Wall)
-            || self.flags.contains(TileFlags::BLOCKS_VISION)
+        matches!(self, TileType::Wall)
     }
 
     pub fn cost(&self) -> f32 {

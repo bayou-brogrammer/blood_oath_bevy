@@ -4,16 +4,16 @@ use bevy_inspector_egui::{options::NumberAttributes, Inspectable};
 use std::ops::{Deref, DerefMut};
 
 #[derive(Debug, Component)]
-pub struct Position(pub Point);
+pub struct Position(pub Coord);
 
 impl Default for Position {
     fn default() -> Self {
-        Self(Point::zero())
+        Self(Coord::new(0, 0))
     }
 }
 
 impl Deref for Position {
-    type Target = Point;
+    type Target = Coord;
 
     fn deref(&self) -> &Self::Target {
         &self.0
@@ -26,9 +26,9 @@ impl DerefMut for Position {
     }
 }
 
-impl From<Point> for Position {
-    fn from(pt: Point) -> Self {
-        Position(pt)
+impl From<Coord> for Position {
+    fn from(coord: Coord) -> Self {
+        Position(coord)
     }
 }
 

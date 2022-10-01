@@ -2,79 +2,79 @@ use crate::prelude::*;
 use std::collections::HashSet;
 
 #[derive(Bundle)]
+pub struct RenderableBundle {
+    pub name: Name,
+    pub glyph: Glyph,
+    pub position: Position,
+}
+
+impl RenderableBundle {
+    pub fn new<S: ToString>(
+        name: S,
+        coord: Coord,
+        glyph: FontCharType,
+        color: ColorPair,
+    ) -> Self {
+        Self {
+            position: Position(coord),
+            name: Name::new(name.to_string()),
+            glyph: Glyph::new(glyph, color),
+        }
+    }
+}
+
+#[derive(Bundle)]
 pub struct PlayerBundle {
     pub tag: Player,
     pub fov: FieldOfView,
-    pub light: LightSource,
+    pub stats: Stats,
 
     #[bundle]
     pub render: RenderableBundle,
 }
 
 impl PlayerBundle {
-    pub fn new(pos: Point, atlas: Handle<TextureAtlas>) -> Self {
-        let idx = get_tile_index(TileSets::Ascii, GameSymbol::Player) as usize;
-        Self {
-            tag: Player,
-            light: LightSource { color: Color::WHITE, range: 8 },
-            fov: FieldOfView { visible_tiles: HashSet::new(), radius: 8 },
-            render: RenderableBundle::new("Player", pos, atlas, idx, true),
-        }
-    }
-}
-
-#[derive(Bundle)]
-pub struct RenderableBundle {
-    pub name: Name,
-    pub position: Position,
-
-    #[bundle]
-    pub sprite: SpriteSheetBundle,
-}
-
-impl RenderableBundle {
     pub fn new<S: ToString>(
+        coord: Coord,
         name: S,
-        pos: Point,
-        texture_atlas: Handle<TextureAtlas>,
-        texture_index: usize,
-        is_visible: bool,
+        glyph: FontCharType,
+        color: ColorPair,
+        stats: Stats,
     ) -> Self {
-        let (x, y) = pt_spritecoords(pos);
         Self {
-            name: Name::new(name.to_string()),
-            position: Position(pos),
-            sprite: SpriteSheetBundle {
-                texture_atlas,
-                visibility: Visibility { is_visible },
-                transform: Transform::from_xyz(x, y, MOB_Z),
-                sprite: get_sprite(texture_index),
-                ..default()
-            },
+            stats,
+            tag: Player,
+            fov: FieldOfView { visible_tiles: HashSet::new(), radius: 8 },
+            render: RenderableBundle::new(name, coord, glyph, color),
         }
     }
 }
 
-#[derive(Bundle)]
-pub struct EnemyBundle {
-    pub tag: Enemy,
+#[derive(Bundle, Component)]
+pub struct HostileBundle {
+    pub tag: Hostile,
     pub fov: FieldOfView,
-    pub light: LightSource,
-    pub blocks: BlocksMovement,
+    pub stats: Stats,
+    pub blocks_tile: BlocksMovement,
 
     #[bundle]
     pub render: RenderableBundle,
 }
 
-impl EnemyBundle {
-    pub fn new(pt: Point, atlas: Handle<TextureAtlas>) -> Self {
-        let idx = get_tile_index(TileSets::Ascii, GameSymbol::Enemy) as usize;
+impl HostileBundle {
+    pub fn new<S: ToString>(
+        coord: Coord,
+        name: S,
+        glyph: FontCharType,
+        color: ColorPair,
+        stats: Stats,
+    ) -> Self {
         Self {
-            blocks: BlocksMovement,
-            tag: Enemy,
-            light: LightSource { color: Color::WHITE, range: 8 },
-            fov: FieldOfView { visible_tiles: HashSet::new(), radius: 5 },
-            render: RenderableBundle::new("Enemy", pt, atlas, idx, true),
+            stats,
+            tag: Hostile,
+            fov: FieldOfView { visible_tiles: HashSet::new(), radius: 8 },
+            blocks_tile: BlocksMovement,
+            render: RenderableBundle::new(name, coord, glyph, color),
         }
     }
 }

@@ -74,7 +74,13 @@ pub fn build_patterns(
     patterns
 }
 
-pub fn render_pattern_to_map(map: &mut Map, chunk: &MapChunk, chunk_size: i32, start_x: i32, start_y: i32) {
+pub fn render_pattern_to_map(
+    map: &mut TileMap,
+    chunk: &MapChunk,
+    chunk_size: i32,
+    start_x: i32,
+    start_y: i32,
+) {
     let mut i = 0usize;
     for tile_y in 0..chunk_size {
         for tile_x in 0..chunk_size {
@@ -111,7 +117,10 @@ pub fn render_pattern_to_map(map: &mut Map, chunk: &MapChunk, chunk_size: i32, s
     }
 }
 
-pub fn patterns_to_constraints(patterns: Vec<Vec<TileType>>, chunk_size: i32) -> Vec<MapChunk> {
+pub fn patterns_to_constraints(
+    patterns: Vec<Vec<TileType>>,
+    chunk_size: i32,
+) -> Vec<MapChunk> {
     // Move into the new constraints object
     let mut constraints: Vec<MapChunk> = Vec::new();
     for p in patterns {
@@ -200,7 +209,8 @@ pub fn patterns_to_constraints(patterns: Vec<Vec<TileType>>, chunk_size: i32) ->
                     if !has_any {
                         // There's no exits on this side, let's match only if
                         // the other edge also has no exits
-                        let matching_exit_count = potential.exits[opposite].iter().filter(|a| !**a).count();
+                        let matching_exit_count =
+                            potential.exits[opposite].iter().filter(|a| !**a).count();
                         if matching_exit_count == 0 {
                             c.compatible_with[direction].push(j);
                         }

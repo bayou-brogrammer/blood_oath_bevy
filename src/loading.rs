@@ -22,8 +22,6 @@ pub struct MapAssets {}
 pub struct LoadingPlugin;
 impl Plugin for LoadingPlugin {
     fn build(&self, app: &mut App) {
-        app.init_resource::<RandomNumbers>();
-
         app.add_loading_state(
             LoadingState::new(GameState::Loading)
                 .with_collection::<FontAssets>()

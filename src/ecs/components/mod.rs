@@ -1,11 +1,15 @@
 use crate::prelude::*;
 use std::collections::HashSet;
 
+mod glyph;
 mod pos;
+mod stat;
 mod tags;
 mod turn;
 
+pub use glyph::*;
 pub use pos::*;
+pub use stat::*;
 pub use tags::*;
 pub use turn::*;
 
@@ -16,10 +20,4 @@ pub struct CameraFollow(pub Entity);
 pub struct FieldOfView {
     pub radius: i32,
     pub visible_tiles: HashSet<Point>,
-}
-
-#[derive(Component, Serialize, Deserialize, Clone)]
-pub struct LightSource {
-    pub color: Color,
-    pub range: i32,
 }

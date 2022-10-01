@@ -4,7 +4,7 @@ use crate::prelude::*;
 pub struct Player;
 
 #[derive(Default, Component)]
-pub struct Enemy;
+pub struct Hostile;
 
 #[derive(Default, Component)]
 pub struct BlocksMovement;

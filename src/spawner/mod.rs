@@ -1,38 +1,28 @@
 use crate::prelude::*;
 
-pub fn spawn_player(
-    mut commands: Commands,
-    tile_map: Res<TileMap>,
-    map_builder: Res<MapBuilder>,
-    textures: Res<TextureAssets>,
-) {
-    let start_pos = &map_builder.player_start;
+mod area;
+mod random_table;
 
-    let player_entity = commands
-        .spawn_bundle(PlayerBundle::new(**start_pos, textures.ascii_tileset_atlas.clone()))
-        .insert(WaitingForTurn::default())
-        .id();
+pub use area::*;
+pub use random_table::*;
 
-    // Add a 2D Camera
-    let (camera_x, camera_y) = get_camera_target(**start_pos, &tile_map);
-    let transform = Transform {
-        translation: Vec3::new(camera_x, camera_y, 999.0),
-        scale: Vec3::new(0.6, 0.6, 1.0),
-        ..Default::default()
-    };
-    commands
-        .spawn_bundle(Camera2dBundle { transform, ..Default::default() })
-        .insert(CameraFollow(player_entity));
+pub fn spawn_player(mut commands: Commands, map_builder: Res<MapBuilder>) {
+    let start_pos = &map_builder.starting_position.expect("No player start found");
+
+    spawn_player_from_raw(&mut commands, *start_pos);
 }
 
-pub fn spawn_others(
-    mut commands: Commands,
-    map_builder: Res<MapBuilder>,
-    textures: Res<TextureAssets>,
-) {
-    map_builder.rooms.iter().skip(1).map(Rect::center).for_each(|pt| {
-        commands.spawn_bundle(EnemyBundle::new(pt, textures.ascii_tileset_atlas.clone()));
-    });
+pub fn spawn_others(mut commands: Commands, map_builder: Res<MapBuilder>) {
+    for (idx, name) in map_builder.spawn_list.iter() {
+        let coord = map_builder.map.index_to_coord(*idx);
+        if let Some(starting_position) = map_builder.starting_position {
+            if coord != starting_position
+                && spawn_named_entity(&mut commands, name, coord).is_none()
+            {
+                println!("Entity with name {} not found in raws", name);
+            }
+        }
+    }
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////

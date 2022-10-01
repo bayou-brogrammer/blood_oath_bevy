@@ -2,24 +2,19 @@ use super::*;
 
 /// Blocked Functionality
 impl TileMap {
-    pub fn clear(&mut self) {
-        self.clear_blocked();
-        self.clear_opaque();
-        self.tile_content.iter_mut().for_each(|v| v.clear());
-    }
-
     pub fn populate_blocked(&mut self) {
         self.tiles
-            .iter_mut()
-            .for_each(|tile| tile.flags.set(TileFlags::BLOCKS_MOVEMENT, !tile.walkable()));
+            .iter()
+            .enumerate()
+            .for_each(|(idx, b)| self.blocked.set_bit(idx, !b.is_walkable()));
     }
 
     pub fn is_blocked(&self, idx: usize) -> bool {
-        self.tiles[idx].flags.contains(TileFlags::BLOCKS_MOVEMENT)
+        self.blocked.get_bit(idx)
     }
 
     pub fn clear_blocked(&mut self) {
-        self.tiles.iter_mut().for_each(|tile| tile.flags.remove(TileFlags::BLOCKS_MOVEMENT));
+        self.blocked.zero_out_bits();
     }
 }
 
@@ -27,28 +22,29 @@ impl TileMap {
 impl TileMap {
     pub fn populate_opaque(&mut self) {
         self.tiles
-            .iter_mut()
-            .for_each(|tile| tile.flags.set(TileFlags::BLOCKS_VISION, tile.is_opaque()))
+            .iter()
+            .enumerate()
+            .for_each(|(idx, b)| self.opaque.set_bit(idx, b.is_walkable()));
     }
 
     pub fn is_opaque(&self, idx: usize) -> bool {
-        self.tiles[idx].flags.contains(TileFlags::BLOCKS_VISION)
+        self.opaque.get_bit(idx)
     }
 
     pub fn clear_opaque(&mut self) {
-        self.tiles.iter_mut().for_each(|tile| tile.flags.remove(TileFlags::BLOCKS_VISION));
+        self.opaque.zero_out_bits();
     }
 }
 
 /// Tile Content Functionality
 impl TileMap {
-    pub fn get_tile_content_pt(&self, pt: Point) -> impl Iterator<Item = Entity> + '_ {
-        let idx = self.point2d_to_index(pt);
+    pub fn get_tile_content_pt(&self, pt: Coord) -> impl Iterator<Item = Entity> + '_ {
+        let idx = self.coord_to_index(pt);
         self.tile_content[idx].iter().map(|(e, _, _)| *e)
     }
 
-    pub fn get_tile_content_pt_clone(&self, pt: Point) -> Vec<Entity> {
-        let idx = self.point2d_to_index(pt);
+    pub fn get_tile_content_pt_clone(&self, pt: Coord) -> Vec<Entity> {
+        let idx = self.coord_to_index(pt);
         self.tile_content[idx].iter().map(|(e, _, _)| *e).collect::<Vec<_>>()
     }
 }
@@ -65,16 +61,16 @@ impl TileMap {
         self.tile_content[idx].push((entity, blocks_tile, blocks_visibility));
 
         if blocks_tile {
-            self.tiles[idx].flags.insert(TileFlags::BLOCKS_MOVEMENT);
+            self.blocked.set_bit(idx, true);
         }
         if blocks_visibility {
-            self.tiles[idx].flags.insert(TileFlags::BLOCKS_VISION);
+            self.opaque.set_bit(idx, true);
         }
     }
 
-    pub fn move_entity(&mut self, entity: Entity, moving_from: Point, moving_to: Point) {
-        let from_idx = self.point2d_to_index(moving_from);
-        let to_idx = self.point2d_to_index(moving_to);
+    pub fn move_entity(&mut self, entity: Entity, moving_from: Coord, moving_to: Coord) {
+        let from_idx = self.coord_to_index(moving_from);
+        let to_idx = self.coord_to_index(moving_to);
 
         let mut entity_blocks = false;
         let mut entity_opaque = false;
@@ -111,15 +107,15 @@ impl TileMap {
             }
         });
 
-        self.tiles[from_idx].flags.set(TileFlags::BLOCKS_MOVEMENT, from_blocked);
-        self.tiles[to_idx].flags.set(TileFlags::BLOCKS_MOVEMENT, to_blocked);
+        self.blocked.set_bit(from_idx, from_blocked);
+        self.blocked.set_bit(to_idx, to_blocked);
 
-        self.tiles[from_idx].flags.set(TileFlags::BLOCKS_VISION, from_opaque);
-        self.tiles[to_idx].flags.set(TileFlags::BLOCKS_VISION, to_opaque);
+        self.opaque.set_bit(from_idx, from_opaque);
+        self.opaque.set_bit(to_idx, to_opaque);
     }
 
-    pub fn remove_entity(&mut self, entity: Entity, pt: Point) {
-        let idx = self.point2d_to_index(pt);
+    pub fn remove_entity(&mut self, entity: Entity, pt: Coord) {
+        let idx = self.coord_to_index(pt);
         self.tile_content[idx].retain(|(e, _, _)| *e != entity);
 
         let mut from_blocked = false;
@@ -133,8 +129,8 @@ impl TileMap {
             }
         });
 
-        self.tiles[idx].flags.set(TileFlags::BLOCKS_MOVEMENT, from_blocked);
-        self.tiles[idx].flags.set(TileFlags::BLOCKS_VISION, from_opaque);
+        self.blocked.set_bit(idx, from_blocked);
+        self.opaque.set_bit(idx, from_opaque);
     }
 }
 
@@ -148,12 +144,12 @@ impl TileMap {
 //     }
 // }
 
-// pub fn for_each_tile_content_pt<F>(pt: Point, mut f: F)
+// pub fn for_each_tile_content_pt<F>(pt: Coord, mut f: F)
 // where
 //     F: FnMut(Entity),
 // {
 //     let lock = SPATIAL_MAP.lock();
-//     let idx = lock.point2d_to_index(pt);
+//     let idx = lock.coord_to_index(pt);
 //     for entity in lock.tile_content[idx].iter() {
 //         f(entity.0);
 //     }

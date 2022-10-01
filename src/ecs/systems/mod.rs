@@ -1,13 +1,11 @@
 use crate::prelude::*;
 
-mod camera;
 mod fov;
 mod map_indexing;
 mod movement;
 mod player;
 mod whos_turn;
 
-pub use camera::*;
 use fov::*;
 use map_indexing::*;
 use movement::*;
@@ -81,7 +79,6 @@ impl Plugin for InGamePlugin {
 pub struct SystemsPlugin;
 impl Plugin for SystemsPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugin(CameraPlugin);
         app.add_plugin(InGamePlugin);
 
         // # InGame #

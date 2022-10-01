@@ -8,13 +8,13 @@ pub fn player_input(
 ) {
     let key = keys.get_pressed().next().cloned();
     if let Some(key) = key {
-        let mut delta = Point::new(0, 0);
+        let mut delta = Coord::new(0, 0);
 
         match key {
             KeyCode::Left => delta.x -= 1,
             KeyCode::Right => delta.x += 1,
-            KeyCode::Down => delta.y -= 1,
-            KeyCode::Up => delta.y += 1,
+            KeyCode::Down => delta.y += 1,
+            KeyCode::Up => delta.y -= 1,
             _ => {}
         }
 
