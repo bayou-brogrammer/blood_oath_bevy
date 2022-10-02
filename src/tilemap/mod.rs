@@ -1,5 +1,3 @@
-use bitflags::bitflags;
-
 use crate::prelude::*;
 use grid_2d::Grid;
 use grid_2d::Size;
@@ -15,16 +13,6 @@ pub use map_builder::*;
 pub use spatial::*;
 pub use themes::*;
 pub use tile::*;
-
-bitflags! {
-    #[derive(Default, Serialize, Deserialize)]
-    pub struct TileFlags: u32{
-        const BLOCKS_MOVEMENT = 1 << 0;
-        const BLOCKS_VISION = 1 << 2;
-        const IN_VIEW = 1 << 3;
-        const EXPLORED = 1 << 4;
-    }
-}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TileMap {

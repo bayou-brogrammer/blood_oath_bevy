@@ -1000,7 +1000,6 @@ dependencies = [
  "bevy_egui",
  "bevy_embedded_assets",
  "bevy_mod_debugdump",
- "bitflags",
  "bitvec",
  "bracket-bevy",
  "bracket-embedding",

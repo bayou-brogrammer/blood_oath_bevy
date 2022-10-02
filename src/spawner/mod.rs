@@ -14,10 +14,11 @@ pub fn spawn_player(mut commands: Commands, map_builder: Res<MapBuilder>) {
 
 pub fn spawn_others(mut commands: Commands, map_builder: Res<MapBuilder>) {
     for (idx, name) in map_builder.spawn_list.iter() {
-        let coord = map_builder.map.index_to_coord(*idx);
         if let Some(starting_position) = map_builder.starting_position {
+            let coord = map_builder.map.index_to_coord(*idx);
             if coord != starting_position
-                && spawn_named_entity(&mut commands, name, coord).is_none()
+                && spawn_named_entity(&mut commands, name, SpawnType::AtPosition(coord))
+                    .is_none()
             {
                 println!("Entity with name {} not found in raws", name);
             }

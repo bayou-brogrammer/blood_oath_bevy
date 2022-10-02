@@ -13,11 +13,12 @@ impl RenderableBundle {
         coord: Coord,
         glyph: FontCharType,
         color: ColorPair,
+        order: RenderOrder,
     ) -> Self {
         Self {
             position: Position(coord),
             name: Name::new(name.to_string()),
-            glyph: Glyph::new(glyph, color),
+            glyph: Glyph::new(glyph, color, order),
         }
     }
 }
@@ -44,7 +45,7 @@ impl PlayerBundle {
             stats,
             tag: Player,
             fov: FieldOfView::new(8),
-            render: RenderableBundle::new(name, coord, glyph, color),
+            render: RenderableBundle::new(name, coord, glyph, color, RenderOrder::Player),
         }
     }
 }
@@ -73,7 +74,29 @@ impl HostileBundle {
             tag: Hostile,
             fov: FieldOfView::new(6),
             blocks_tile: BlocksMovement,
-            render: RenderableBundle::new(name, coord, glyph, color),
+            render: RenderableBundle::new(name, coord, glyph, color, RenderOrder::Actor),
+        }
+    }
+}
+
+#[derive(Bundle, Component)]
+pub struct ItemBundle {
+    pub tag: Item,
+
+    #[bundle]
+    pub render: RenderableBundle,
+}
+
+impl ItemBundle {
+    pub fn new<S: ToString>(
+        coord: Coord,
+        name: S,
+        glyph: FontCharType,
+        color: ColorPair,
+    ) -> Self {
+        Self {
+            tag: Item,
+            render: RenderableBundle::new(name, coord, glyph, color, RenderOrder::Item),
         }
     }
 }

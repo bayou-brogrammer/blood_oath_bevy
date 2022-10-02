@@ -62,7 +62,6 @@ bevy-inspector-egui = "0.13"
 bevy_egui           = "0.16"
 
 # Utility
-bitflags      = "1"
 bitvec        = { version = "1", features = ["serde"] }
 lazy_static   = "1"
 ordered-float = "3"
