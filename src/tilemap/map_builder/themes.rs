@@ -1,0 +1,92 @@
+use crate::prelude::*;
+
+pub struct Glyph {
+    // the index in the atlas sprite sheet
+    pub index: usize,
+    // the color to tint the glyph
+    pub color: Color,
+    // the background color. If the glyph uses the full cell, not needed
+    pub bkg_color: Option<Color>,
+}
+
+impl Glyph {
+    fn new(index: usize, color: Color, bkg_color: Color) -> Self {
+        Self { index, color, bkg_color: Some(bkg_color) }
+    }
+    fn new_nobkg(index: usize, color: Color) -> Self {
+        Self { index, color, bkg_color: None }
+    }
+}
+
+#[derive(Debug)]
+pub struct DungeonTheme {}
+
+impl DungeonTheme {
+    pub fn build() -> Box<dyn MapTheme> {
+        Box::new(Self {})
+    }
+}
+
+impl MapTheme for DungeonTheme {
+    fn tile_to_render(&self, tile_type: TileType) -> Option<Glyph> {
+        let glyph_color = Color::rgba(0.3, 0.3, 0.3, 1.0);
+        let wall_color = Color::rgba(0.05, 0.05, 0.05, 1.0);
+        let floor_color = Color::rgba(0.529, 0.529, 0.529, 1.0);
+
+        match tile_type {
+            // index 219 is a full square
+            TileType::Floor => Some(Glyph::new_nobkg(85, floor_color)),
+            TileType::Wall => Some(Glyph::new(243, glyph_color, wall_color)),
+            TileType::DownStairs => Some(Glyph::new('>' as usize, glyph_color, floor_color)),
+            _ => None,
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct ForestTheme {}
+
+impl ForestTheme {
+    pub fn build() -> Box<dyn MapTheme> {
+        Box::new(Self {})
+    }
+}
+
+impl MapTheme for ForestTheme {
+    fn tile_to_render(&self, tile_type: TileType) -> Option<Glyph> {
+        let glyph_color = Color::rgba(0.105, 0.470, 0.215, 1.0);
+        let cell_color = Color::rgba(0.352, 0.682, 0.380, 1.0);
+
+        match tile_type {
+            // index 219 is a full square
+            TileType::Floor => Some(Glyph::new_nobkg(219, cell_color)),
+            TileType::Wall => Some(Glyph::new(30, glyph_color, cell_color)),
+            TileType::DownStairs => Some(Glyph::new('>' as usize, glyph_color, cell_color)),
+            _ => None,
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct CaveTheme {}
+
+impl CaveTheme {
+    pub fn build() -> Box<dyn MapTheme> {
+        Box::new(Self {})
+    }
+}
+
+impl MapTheme for CaveTheme {
+    fn tile_to_render(&self, tile_type: TileType) -> Option<Glyph> {
+        let glyph_color = Color::rgba(0.549, 0.317, 0.039, 1.0);
+        let cell_color = Color::rgba(0.749, 0.505, 0.176, 1.0);
+
+        match tile_type {
+            // index 219 is a full square
+            TileType::Floor => Some(Glyph::new_nobkg(219, cell_color)),
+            TileType::Wall => Some(Glyph::new(178, glyph_color, cell_color)),
+            TileType::DownStairs => Some(Glyph::new('>' as usize, glyph_color, cell_color)),
+            _ => None,
+        }
+    }
+}

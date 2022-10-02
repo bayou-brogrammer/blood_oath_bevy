@@ -1,0 +1,11 @@
+[
+  RawItem(
+    name: "Dagger",
+     glyph: RawGlyph(
+        char: '/',
+        fg: (0, 255, 255),
+        bg: None,
+        order: Item
+    ),
+  )
+]
