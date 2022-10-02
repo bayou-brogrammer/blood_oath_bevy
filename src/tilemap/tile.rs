@@ -30,4 +30,12 @@ impl TileType {
         // }
         1.0
     }
+
+    pub fn is_wall(&self) -> bool {
+        matches!(self, TileType::Wall)
+    }
+
+    pub fn is_floor(&self) -> bool {
+        matches!(self, TileType::Floor)
+    }
 }

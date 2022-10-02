@@ -314,29 +314,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "bevy_asset_loader"
-version = "0.12.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "91275716531c98d9907ee8c57854d11e3688780a9cefc66b1d4da601a3e3c41e"
-dependencies = [
- "anyhow",
- "bevy",
- "bevy_asset_loader_derive",
- "iyes_loopless",
-]
-
-[[package]]
-name = "bevy_asset_loader_derive"
-version = "0.12.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e721755806423f711c0934295872808adb20d379b3073c679ed544960fc84b6d"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn",
-]
-
-[[package]]
 name = "bevy_audio"
 version = "0.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -447,17 +424,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn",
-]
-
-[[package]]
-name = "bevy_ecs_tilemap"
-version = "0.7.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5ef56c77808aa1fc7379ce538bd9a1e4048794203b4f591f2d06131fc613a1cc"
-dependencies = [
- "bevy",
- "log",
- "regex",
 ]
 
 [[package]]
@@ -1031,8 +997,6 @@ dependencies = [
  "anyhow",
  "bevy",
  "bevy-inspector-egui",
- "bevy_asset_loader",
- "bevy_ecs_tilemap",
  "bevy_egui",
  "bevy_embedded_assets",
  "bevy_mod_debugdump",
@@ -1040,10 +1004,8 @@ dependencies = [
  "bitvec",
  "bracket-bevy",
  "bracket-embedding",
- "bracket-geometry 0.8.3 (git+https://github.com/amethyst/bracket-lib)",
  "bracket-noise",
  "bracket-pathfinding",
- "bracket-random 0.8.3",
  "bracket-rex",
  "direction",
  "embed-resource",
@@ -1071,7 +1033,7 @@ name = "bracket-algorithm-traits"
 version = "0.8.2"
 source = "git+https://github.com/lecoqjacob/bracket-lib?branch=custom#ce80dad210e43d6d501c5c3b27b85cc3825e3c19"
 dependencies = [
- "bracket-geometry 0.8.3 (git+https://github.com/lecoqjacob/bracket-lib?branch=custom)",
+ "bracket-geometry",
  "smallvec",
 ]
 
@@ -1082,7 +1044,7 @@ source = "git+https://github.com/lecoqjacob/bracket-lib?branch=custom#ce80dad210
 dependencies = [
  "bevy",
  "bracket-color 0.8.2 (git+https://github.com/lecoqjacob/bracket-lib?branch=custom)",
- "bracket-geometry 0.8.3 (git+https://github.com/lecoqjacob/bracket-lib?branch=custom)",
+ "bracket-geometry",
  "bracket-random 0.8.4",
  "lazy_static",
  "parking_lot 0.12.1",
@@ -1125,15 +1087,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "bracket-geometry"
-version = "0.8.3"
-source = "git+https://github.com/amethyst/bracket-lib#34ba81211c8583d29dca8decef57a2ecd8269a8b"
-dependencies = [
- "serde",
- "ultraviolet",
-]
-
-[[package]]
 name = "bracket-noise"
 version = "0.8.2"
 source = "git+https://github.com/amethyst/bracket-lib#34ba81211c8583d29dca8decef57a2ecd8269a8b"
@@ -1147,7 +1100,7 @@ version = "0.8.4"
 source = "git+https://github.com/lecoqjacob/bracket-lib?branch=custom#ce80dad210e43d6d501c5c3b27b85cc3825e3c19"
 dependencies = [
  "bracket-algorithm-traits",
- "bracket-geometry 0.8.3 (git+https://github.com/lecoqjacob/bracket-lib?branch=custom)",
+ "bracket-geometry",
  "num-rational 0.4.1",
  "smallvec",
 ]
@@ -1163,7 +1116,6 @@ dependencies = [
  "rand",
  "rand_xorshift",
  "regex",
- "serde",
  "wasm-bindgen",
 ]
 
@@ -3466,7 +3418,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d25bf25ec5ae4a3f1b92f929810509a2f53d7dca2f50b794ff57e3face536c8f"
 dependencies = [
  "rand_core",
- "serde",
 ]
 
 [[package]]

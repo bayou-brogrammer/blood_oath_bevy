@@ -7,11 +7,13 @@ use grid_2d::Size;
 mod bitgrid;
 mod map_builder;
 mod spatial;
+mod themes;
 mod tile;
 
 pub use bitgrid::*;
 pub use map_builder::*;
 pub use spatial::*;
+pub use themes::*;
 pub use tile::*;
 
 bitflags! {
@@ -113,7 +115,7 @@ impl TileMap {
     // checks if it is physically possible (ie no wall or physical object)
     pub fn can_enter_tile(&self, coord: Coord) -> bool {
         let idx = self.coord_to_index(coord);
-        self.in_bounds(coord) && !self.is_blocked(idx)
+        self.size.is_valid(coord) && self.in_bounds(coord) && !self.is_blocked(idx)
     }
 
     fn valid_exit(&self, loc: Coord, delta: Coord) -> Option<usize> {

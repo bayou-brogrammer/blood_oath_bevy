@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use std::collections::HashSet;
 
 #[derive(Bundle)]
 pub struct RenderableBundle {
@@ -44,7 +43,7 @@ impl PlayerBundle {
         Self {
             stats,
             tag: Player,
-            fov: FieldOfView { visible_tiles: HashSet::new(), radius: 8 },
+            fov: FieldOfView::new(8),
             render: RenderableBundle::new(name, coord, glyph, color),
         }
     }
@@ -72,7 +71,7 @@ impl HostileBundle {
         Self {
             stats,
             tag: Hostile,
-            fov: FieldOfView { visible_tiles: HashSet::new(), radius: 8 },
+            fov: FieldOfView::new(6),
             blocks_tile: BlocksMovement,
             render: RenderableBundle::new(name, coord, glyph, color),
         }

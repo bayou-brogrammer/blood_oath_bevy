@@ -43,8 +43,6 @@ bevy = { version = "0.8.1", default-features = false, features = [
   "x11",
 ] }
 
-bevy_asset_loader    = { version = "0.12", features = ["stageless", "2d"] }
-bevy_ecs_tilemap     = { version = "0.7", features = ["atlas"] }
 bevy_embedded_assets = { version = "0.4", optional = true }
 bevy_mod_debugdump   = { version = "0.5", optional = true, default-features = false }
 iyes_loopless        = { version = "0.7" }
@@ -55,10 +53,8 @@ bracket-bevy = { git = "https://github.com/lecoqjacob/bracket-lib", branch = "cu
   "alloc",
 ] }
 bracket-embedding = { git = "https://github.com/amethyst/bracket-lib" }
-bracket-geometry = { git = "https://github.com/amethyst/bracket-lib", features = ['serde'] }
 bracket-noise = { git = "https://github.com/amethyst/bracket-lib" }
 bracket-pathfinding = { git = "https://github.com/lecoqjacob/bracket-lib", branch = "custom" }
-bracket-random = { git = "https://github.com/amethyst/bracket-lib", features = ['serde'] }
 bracket-rex = { git = "https://github.com/amethyst/bracket-lib" }
 
 # UI

@@ -1,5 +1,28 @@
 use super::*;
 
+/// Visibility Functionality
+impl TileMap {
+    pub fn clear_visible(&mut self) {
+        self.visible.zero_out_bits();
+    }
+
+    pub fn set_revealed_and_visible(&mut self, coord: Coord) {
+        if self.in_bounds(coord) {
+            let idx = self.coord_to_index(coord);
+            self.visible.set_bit(idx, true);
+            self.revealed.set_bit(idx, true);
+        }
+    }
+
+    pub fn is_visible(&self, coord: Coord) -> bool {
+        self.visible.get_bit(self.coord_to_index(coord))
+    }
+
+    pub fn is_revealed(&self, coord: Coord) -> bool {
+        self.revealed.get_bit(self.coord_to_index(coord))
+    }
+}
+
 /// Blocked Functionality
 impl TileMap {
     pub fn populate_blocked(&mut self) {
@@ -24,7 +47,7 @@ impl TileMap {
         self.tiles
             .iter()
             .enumerate()
-            .for_each(|(idx, b)| self.opaque.set_bit(idx, b.is_walkable()));
+            .for_each(|(idx, b)| self.opaque.set_bit(idx, b.is_opaque()));
     }
 
     pub fn is_opaque(&self, idx: usize) -> bool {

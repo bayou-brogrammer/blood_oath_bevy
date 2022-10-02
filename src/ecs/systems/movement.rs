@@ -9,7 +9,7 @@ pub fn movement(
     // mut commands: Commands,
 ) {
     for WantsToMove(entity, destination) in move_events.drain() {
-        if map.in_bounds(destination) && !map.is_blocked(map.coord_to_index(destination)) {
+        if map.can_enter_tile(destination) {
             if let Ok(mut pos) = pos_q.get_mut(entity) {
                 pos.0 = destination;
                 map.move_entity(entity, pos.0, destination);

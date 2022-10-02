@@ -1,5 +1,4 @@
 mod ecs;
-mod loading;
 mod raws;
 mod spawner;
 mod tilemap;
@@ -7,24 +6,18 @@ mod util;
 
 mod prelude {
     pub use bevy::prelude::*;
-    pub use bevy_asset_loader::prelude::*;
-    pub use bevy_ecs_tilemap::prelude::*;
     pub use iyes_loopless::prelude::*;
 
     pub use bitvec::prelude::*;
     pub use serde::{Deserialize, Serialize};
 
     pub use bracket_bevy::prelude::*;
-    pub use direction::*;
-    pub use grid_2d::*;
-    // pub use bracket_geometry::prelude::*;
     pub use bracket_noise::prelude::*;
     pub use bracket_pathfinding::prelude::*;
-    // pub use bracket_random::prelude::*;
-    // pub use bracket_rex::prelude::*;
+    pub use direction::*;
+    pub use grid_2d::*;
 
     pub use crate::ecs::*;
-    pub use crate::loading::*;
     pub use crate::raws::*;
     pub use crate::spawner::*;
     pub use crate::tilemap::*;
@@ -120,25 +113,5 @@ pub fn app() -> Option<App> {
         return None;
     }
 
-    app.add_system(tick.run_in_state(GameState::InGame));
-
     Some(app)
-}
-
-pub fn tick(map: Res<TileMap>, ctx: Res<BracketContext>, q: Query<(&Glyph, &Position)>) {
-    for (idx, tile) in map.tiles.iter().enumerate() {
-        let (glyph, color) = match tile {
-            TileType::Floor => (to_cp437('.'), RGB::from_u8(127, 127, 127)),
-            TileType::Wall => (to_cp437('#'), RGB::from_u8(125, 82, 44)),
-            TileType::Door => (to_cp437('+'), RGB::from_u8(127, 127, 127)),
-            _ => todo!(),
-        };
-
-        let coord = map.index_to_coord(idx);
-        ctx.set(coord.x, coord.y, color, RGB::from_f32(0., 0., 0.), glyph);
-    }
-
-    for (g, p) in &q {
-        ctx.set(p.x, p.y, g.color.fg, g.color.bg, g.glyph);
-    }
 }
