@@ -73,6 +73,9 @@ impl BuilderChain {
         for metabuilder in self.builders.iter_mut() {
             metabuilder.build_map(&mut self.map_builder, rng);
         }
+
+        // Display the map
+        self.map_builder.display();
     }
 }
 
@@ -127,16 +130,57 @@ impl MapBuilder {
         }
         println!();
     }
+
+    pub fn display(&self) {
+        use colored::*;
+        let map = &self.map;
+        let mut output = vec!['.'; map.width() as usize * map.height() as usize];
+
+        map.tiles.iter().enumerate().for_each(|(idx, t)| match *t {
+            TileType::Floor => output[idx] = '.',
+            TileType::Wall => output[idx] = '#',
+            TileType::DownStairs => output[idx] = '>',
+            TileType::UpStairs => output[idx] = '<',
+            TileType::Door => output[idx] = '+',
+        });
+
+        output[map.coord_to_index(self.starting_position.expect("Player start expected"))] =
+            '@';
+
+        self.spawn_list.iter().for_each(|(idx, string)| {
+            output[*idx] = 'M';
+        });
+
+        print!("\x1B[2J"); // CLS!
+        println!(
+            "----------------------\n{}\n----------------------",
+            map.name.bright_yellow()
+        );
+
+        for y in 0..map.height() {
+            for x in 0..map.width() {
+                match output[map.xy_idx(x, y)] {
+                    '#' => print!("{}", "#".bright_green()),
+                    '@' => print!("{}", "@".bright_yellow()),
+                    'M' => print!("{}", "M".bright_red()),
+                    'A' => print!("{}", "A".bright_magenta()),
+                    _ => print!("{}", ".".truecolor(64, 64, 64)),
+                }
+            }
+            println!();
+        }
+    }
 }
 
 fn setup(mut commands: Commands, rng: Res<RandomNumbers>) {
     let mut builder = BuilderChain::new(grid_2d::Size::new(80, 50), 0, "New Map");
     builder
-        .start_with(CellularAutomataArchitect::new_with_floor_percent(65))
-        .with(RoomMapArchitect::new())
-        .with(BspCorridors::new())
-        .with(RoomDrawer::new())
-        .with(CorridorSpawner::new())
+        .start_with(DLABuilder::insectoid())
+        // .start_with(CellularAutomataArchitect::new_with_floor_percent(65))
+        // .with(RoomMapArchitect::new())
+        // .with(BspCorridors::new())
+        // .with(RoomDrawer::new())
+        // .with(CorridorSpawner::new())
         .with(SurroundWithWall::new())
         .with(AreaStartingPosition::new(XStart::Center, YStart::Center))
         .with(VoronoiSpawning::new("Default"))

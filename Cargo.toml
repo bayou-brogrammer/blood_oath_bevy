@@ -67,8 +67,8 @@ lazy_static   = "1"
 ordered-float = "3"
 parking_lot   = "0.12"
 serde         = { version = "1", features = ["derive"] }
-tracing       = "0.1"
 
+colored   = "2"
 direction = { version = "0.18", features = ["serialize"] }
 grid_2d   = { version = "0.15", features = ["serialize"] }
 perlin2   = "0.1"
@@ -78,6 +78,9 @@ ron       = "0.8"
 anyhow = "1"
 image  = { version = "0.24", default-features = false }
 winit  = { version = "0.26.0", default-features = false }
+
+[dev-dependencies]
+tracing = "0.1"
 
 [build-dependencies]
 embed-resource = "1.4"

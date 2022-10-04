@@ -14,3 +14,8 @@ pub struct BlocksMovement;
 
 #[derive(Component)]
 pub struct BlocksVisibility;
+
+#[derive(Component, Debug, Clone)]
+pub struct InBackpack {
+    pub owner: Entity,
+}

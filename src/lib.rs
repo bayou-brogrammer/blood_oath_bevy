@@ -1,3 +1,4 @@
+#[allow(clippy::type_complexity)]
 mod ecs;
 mod raws;
 mod spawner;
@@ -55,7 +56,7 @@ pub fn app() -> Option<App> {
     app.insert_resource(WindowDescriptor {
         width: WINDOW_WIDTH,
         height: WINDOW_HEIGHT,
-        title: String::from("Tiled TileMap Editor Example"),
+        title: String::from("Game"),
         ..Default::default()
     })
     .insert_resource(ClearColor(Color::rgb(0.0, 0.0, 0.0)))
@@ -98,9 +99,11 @@ pub fn app() -> Option<App> {
     app.add_plugin(
         BTermBuilder::empty()
             .with_random_number_generator(true)
-            .with_font("terminal8x8.png", 16, 16, (16.0, 16.0))
+            .with_font("terminal8x8.png", 16, 16, (8.0, 8.0))
+            .with_font("terminal16x16.png", 16, 16, (18.0, 18.0))
+            .with_font("dungeonfont.png", 16, 16, (32.0, 32.0))
             .with_font("vga8x16.png", 16, 16, (8.0, 16.0))
-            .with_simple_console(0, 80, 50)
+            .with_simple_console(2, 80, 50)
             .with_background(true), // .with_scaling_mode(TerminalScalingMode::ResizeTerminals),
     )
     .add_plugin(MapBuilderPlugin)

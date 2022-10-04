@@ -8,3 +8,6 @@ pub struct WantsToMove(pub Entity, pub Coord);
 #[derive(Debug)]
 /// (Who is attacking, Who they are attacking)
 pub struct WantsToAttack(pub Entity, pub Entity);
+
+#[derive(Debug)]
+pub struct WantsToPickupItem(pub Entity, pub Entity);

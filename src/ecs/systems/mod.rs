@@ -1,6 +1,7 @@
 use crate::prelude::*;
 
 mod fov;
+mod inventory;
 mod map_indexing;
 mod movement;
 mod player;
@@ -8,6 +9,7 @@ mod render;
 mod whos_turn;
 
 use fov::*;
+use inventory::*;
 use map_indexing::*;
 use movement::*;
 use player::*;
@@ -87,7 +89,7 @@ impl Plugin for SystemsPlugin {
             SystemSet::new().with_system(map_indexing).with_system(fov.after(map_indexing)),
         );
 
-        app.add_plugin(InGamePlugin).add_plugin(RenderingPlugin);
+        app.add_plugin(InGamePlugin).add_plugin(RenderingPlugin).add_plugin(InventoryPlugin);
 
         app.add_system(fov.run_in_state(GameState::InGame));
     }
