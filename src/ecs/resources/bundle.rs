@@ -45,7 +45,7 @@ impl PlayerBundle {
             stats,
             tag: Player,
             fov: FieldOfView::new(8),
-            render: RenderableBundle::new(name, coord, glyph, color, RenderOrder::Player),
+            render: RenderableBundle::new(name, coord, glyph, color, RenderOrder::Actor),
         }
     }
 }
@@ -96,7 +96,7 @@ impl ItemBundle {
     ) -> Self {
         Self {
             tag: Item,
-            render: RenderableBundle::new(name, coord, glyph, color, RenderOrder::Item),
+            render: RenderableBundle::new(name, coord, glyph, color, RenderOrder::Actor),
         }
     }
 }

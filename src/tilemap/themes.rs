@@ -28,21 +28,23 @@ impl TileType {
     ) -> (FontCharType, ColorPair) {
         let (glyph, fg, bg) = match self {
             TileType::Wall => {
-                let is_wall_below = if let Some(tile) = map.tiles.get(map.index_to_coord(idx))
-                {
-                    tile.is_wall()
-                } else {
-                    false
-                };
+                // let is_wall_below = if let Some(tile) = map.tiles.get(map.index_to_coord(idx))
+                // {
+                //     tile.is_wall()
+                // } else {
+                //     false
+                // };
 
-                if is_wall_below {
-                    (to_cp437(' '), RGB::from_u8(68, 39, 14), RGB::from_u8(125, 82, 44))
-                } else {
-                    (to_cp437('▄'), RGB::from_u8(68, 39, 14), RGB::from_u8(125, 82, 44))
-                }
+                // if is_wall_below {
+                //     (to_cp437(' '), RGB::from_u8(68, 39, 14), RGB::from_u8(125, 82, 44))
+                // } else {
+                //     (to_cp437('▄'), RGB::from_u8(68, 39, 14), RGB::from_u8(125, 82, 44))
+                // }
 
                 // let pt = map.index_to_point2d(idx);
                 // (wall_glyph(map, pt.x, pt.y), RGB::from_u8(8, 39, 14), RGB::named(BLACK))
+
+                (to_cp437('#'), RGB::named(WHITE), RGB::named(BLACK))
             }
             TileType::DownStairs => (to_cp437('>'), RGB::named(CYAN), RGB::named(BLACK)),
             TileType::UpStairs => (to_cp437('<'), RGB::named(CYAN), RGB::named(BLACK)),

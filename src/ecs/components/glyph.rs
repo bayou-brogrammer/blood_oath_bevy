@@ -4,13 +4,12 @@ use crate::{impl_new, prelude::*};
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 pub enum RenderOrder {
     Particle, // Top
-    Player,
     Actor,
     Item,
     Corpse, // Last
 }
 
-#[derive(Component, Serialize, Deserialize, Clone)]
+#[derive(Component, Clone)]
 pub struct Glyph {
     pub color: ColorPair,
     pub glyph: FontCharType,

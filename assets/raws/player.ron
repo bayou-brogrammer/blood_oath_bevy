@@ -18,6 +18,6 @@ RawPlayer(
         char: '@',
         fg: (255, 255, 0),
         bg: None,
-        order: Player
+        order: Actor
     ),
 )

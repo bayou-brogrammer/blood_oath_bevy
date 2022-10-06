@@ -10,6 +10,7 @@ pub fn spawn_player(mut commands: Commands, map_builder: Res<MapBuilder>) {
     let start_pos = &map_builder.starting_position.expect("No player start found");
 
     spawn_player_from_raw(&mut commands, *start_pos);
+    commands.insert_resource(CameraView::new(*start_pos));
 }
 
 pub fn spawn_others(mut commands: Commands, map_builder: Res<MapBuilder>) {

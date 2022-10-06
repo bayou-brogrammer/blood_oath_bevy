@@ -1,3 +1,4 @@
+mod camera;
 #[allow(clippy::type_complexity)]
 mod ecs;
 mod raws;
@@ -10,14 +11,17 @@ mod prelude {
     pub use iyes_loopless::prelude::*;
 
     pub use bitvec::prelude::*;
+    pub use lazy_static::lazy_static;
     pub use serde::{Deserialize, Serialize};
 
     pub use bracket_bevy::prelude::*;
+    pub use bracket_bevy::FontCharType;
     pub use bracket_noise::prelude::*;
     pub use bracket_pathfinding::prelude::*;
     pub use direction::*;
     pub use grid_2d::*;
 
+    pub use crate::camera::*;
     pub use crate::ecs::*;
     pub use crate::raws::*;
     pub use crate::spawner::*;
@@ -29,13 +33,23 @@ mod prelude {
     pub const WINDOW_WIDTH: f32 = 960.0;
     pub const WINDOW_HEIGHT: f32 = 720.0;
 
-    pub const VIEWPORT_WIDTH: f32 = 50.0;
-    pub const VIEWPORT_HEIGHT: f32 = 50.0;
-    pub const VIEWPORT_OFFSET: (f32, f32) = (0.0, 0.0);
+    // Screens
+    pub const SCREEN_WIDTH: i32 = 80;
+    pub const SCREEN_HEIGHT: i32 = 50;
+    pub const DISPLAY_WIDTH: i32 = SCREEN_WIDTH / 2;
+    pub const DISPLAY_HEIGHT: i32 = SCREEN_HEIGHT / 2;
 
-    pub const DEBUG_MAP: bool = true;
-    pub const TILEMAP_Z: f32 = 0.0;
-    pub const MOB_Z: f32 = 3.0;
+    // Batches
+    pub const BATCH_ZERO: usize = 0;
+    pub const BATCH_CHARS: usize = 1000;
+    // pub const BATCH_PARTICLES: usize = 2000;
+    // pub const BATCH_UI: usize = 10_000;
+    // pub const BATCH_UI_INV: usize = 15_000;
+    // pub const BATCH_TOOLTIPS: usize = 100_000; // Over everything
+
+    // Layers
+    pub const LAYER_ZERO: usize = 0;
+    pub const LAYER_CHAR: usize = 1;
 }
 
 use bevy::render::texture::ImageSettings;
@@ -99,12 +113,14 @@ pub fn app() -> Option<App> {
     app.add_plugin(
         BTermBuilder::empty()
             .with_random_number_generator(true)
+            .with_scaling_mode(TerminalScalingMode::ResizeTerminals)
             .with_font("terminal8x8.png", 16, 16, (8.0, 8.0))
-            .with_font("terminal16x16.png", 16, 16, (18.0, 18.0))
             .with_font("dungeonfont.png", 16, 16, (32.0, 32.0))
             .with_font("vga8x16.png", 16, 16, (8.0, 16.0))
-            .with_simple_console(2, 80, 50)
-            .with_background(true), // .with_scaling_mode(TerminalScalingMode::ResizeTerminals),
+            .with_simple_console(1, 80, 50)
+            .with_background(true)
+            .with_sparse_console(1, 80, 50)
+            .with_background(false),
     )
     .add_plugin(MapBuilderPlugin)
     .add_plugin(SpawnerPlugin)
