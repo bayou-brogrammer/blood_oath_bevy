@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Bundle)]
+#[derive(Bundle, Component)]
 pub struct RenderableBundle {
     pub name: Name,
     pub glyph: Glyph,
@@ -23,7 +23,7 @@ impl RenderableBundle {
     }
 }
 
-#[derive(Bundle)]
+#[derive(Bundle, Component)]
 pub struct PlayerBundle {
     pub tag: Player,
     pub fov: FieldOfView,
@@ -50,7 +50,7 @@ impl PlayerBundle {
     }
 }
 
-#[derive(Bundle, Component)]
+#[derive(Bundle)]
 pub struct HostileBundle {
     pub tag: Hostile,
     pub fov: FieldOfView,

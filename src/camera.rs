@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
-pub const VIEWPORT_X_OFFSET: i32 = 20;
-pub const VIEWPORT_Y_OFFSET: i32 = 10;
+pub const VIEWPORT_X_OFFSET: i32 = DISPLAY_WIDTH / 2;
+pub const VIEWPORT_Y_OFFSET: i32 = DISPLAY_HEIGHT / 2;
 pub const VIEWPORT_WIDTH: i32 = 100;
 pub const VIEWPORT_HEIGHT: i32 = 100;
 

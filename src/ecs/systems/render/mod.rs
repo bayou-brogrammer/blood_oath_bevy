@@ -1,6 +1,11 @@
 use crate::prelude::*;
 
-pub fn render_map(map: Res<TileMap>, camera: Res<CameraView>, ctx: Res<BracketContext>) {
+pub fn render_map(
+    map: Res<TileMap>,
+    camera: Res<CameraView>,
+    ctx: Res<BracketContext>,
+    renderables: Query<(&Glyph, &Position)>,
+) {
     let mut batch = ctx.new_draw_batch();
     batch.target(LAYER_ZERO);
     batch.cls();
@@ -14,19 +19,8 @@ pub fn render_map(map: Res<TileMap>, camera: Res<CameraView>, ctx: Res<BracketCo
         }
     });
 
-    ctx.submit_batch(BATCH_ZERO, batch);
-}
-
-pub fn render_entities(
-    map: Res<TileMap>,
-    camera: Res<CameraView>,
-    ctx: Res<BracketContext>,
-    renderables: Query<(&Glyph, &Position)>,
-) {
-    let mut batch = ctx.new_draw_batch();
     batch.target(LAYER_CHAR);
     batch.cls();
-
     let mut entities = renderables.iter().collect::<Vec<_>>();
     entities.sort_by(|&a, &b| b.0.render_order.cmp(&a.0.render_order));
     for (glyph, pos) in entities {
@@ -36,13 +30,35 @@ pub fn render_entities(
         }
     }
 
-    ctx.submit_batch(BATCH_CHARS, batch);
+    ctx.submit_batch(BATCH_ZERO, batch);
 }
+
+// pub fn render_entities(
+//     map: Res<TileMap>,
+//     camera: Res<CameraView>,
+//     ctx: Res<BracketContext>,
+//     renderables: Query<(&Glyph, &Position)>,
+// ) {
+//     let mut batch = ctx.new_draw_batch();
+//     batch.target(LAYER_ZERO);
+//     batch.cls();
+
+//     let mut entities = renderables.iter().collect::<Vec<_>>();
+//     entities.sort_by(|&a, &b| b.0.render_order.cmp(&a.0.render_order));
+//     for (glyph, pos) in entities {
+//         if map.is_visible(**pos) {
+//             let screen_pt = camera.world_to_screen(pos.to_point());
+//             batch.set(screen_pt, glyph.color, glyph.glyph);
+//         }
+//     }
+
+//     ctx.submit_batch(BATCH_ZERO, batch);
+// }
 
 pub struct RenderingPlugin;
 impl Plugin for RenderingPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system(render_map.run_in_state(GameState::InGame))
-            .add_system(render_entities.run_in_state(GameState::InGame));
+        app.add_system(render_map.run_in_state(GameState::InGame));
+        // .add_system(render_entities.run_in_state(GameState::InGame));
     }
 }

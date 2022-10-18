@@ -6,7 +6,7 @@ pub enum GameState {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub enum InGameState {
+pub enum TurnState {
     WhosTurn,
     AwaitingInput,
     ResolveActions,

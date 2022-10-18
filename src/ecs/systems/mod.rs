@@ -3,7 +3,7 @@ use crate::prelude::*;
 mod fov;
 mod inventory;
 mod map_indexing;
-mod movement;
+pub mod movement;
 mod player;
 mod render;
 mod whos_turn;
@@ -19,64 +19,64 @@ use whos_turn::*;
 pub struct InGamePlugin;
 impl Plugin for InGamePlugin {
     fn build(&self, app: &mut App) {
-        // InGame && WhosTurn
-        app.add_system_set(
-            ConditionSet::new()
-                .run_in_state(GameState::InGame)
-                .run_in_state(InGameState::WhosTurn)
-                .with_system(whos_turn)
-                .into(),
-        );
+        // // InGame && WhosTurn
+        // app.add_system_set(
+        //     ConditionSet::new()
+        //         .run_in_state(GameState::InGame)
+        //         .run_in_state(InGameState::WhosTurn)
+        //         .with_system(whos_turn)
+        //         .into(),
+        // );
 
-        // InGame && AwaitingInput
-        app.add_system_set(
-            ConditionSet::new()
-                .run_in_state(GameState::InGame)
-                .run_in_state(InGameState::AwaitingInput)
-                .with_system(player_input)
-                .into(),
-        );
+        // // InGame && AwaitingInput
+        // app.add_system_set(
+        //     ConditionSet::new()
+        //         .run_in_state(GameState::InGame)
+        //         .run_in_state(InGameState::AwaitingInput)
+        //         .with_system(player_input)
+        //         .into(),
+        // );
 
-        // InGame && ScoreAIActions
-        app.add_system_set(
-            ConditionSet::new()
-                .run_in_state(GameState::InGame)
-                .run_in_state(InGameState::ScoreAIActions)
-                .with_system(switch_in_game_state!(InGameState::GenerateAIActions))
-                .into(),
-        );
-        // add_ai_scoring_systems(app);
+        // // InGame && ScoreAIActions
+        // app.add_system_set(
+        //     ConditionSet::new()
+        //         .run_in_state(GameState::InGame)
+        //         .run_in_state(InGameState::ScoreAIActions)
+        //         .with_system(switch_in_game_state!(InGameState::GenerateAIActions))
+        //         .into(),
+        // );
+        // // add_ai_scoring_systems(app);
 
-        // InGame && GenerateAIActions
-        app.add_system_set(
-            ConditionSet::new()
-                .run_in_state(GameState::InGame)
-                .run_in_state(InGameState::GenerateAIActions)
-                .with_system(switch_in_game_state!(InGameState::ResolveActions))
-                .into(),
-        );
-        // add_ai_action_generating_systems(app);
+        // // InGame && GenerateAIActions
+        // app.add_system_set(
+        //     ConditionSet::new()
+        //         .run_in_state(GameState::InGame)
+        //         .run_in_state(InGameState::GenerateAIActions)
+        //         .with_system(switch_in_game_state!(InGameState::ResolveActions))
+        //         .into(),
+        // );
+        // // add_ai_action_generating_systems(app);
 
-        // InGame && ResolveActions
-        app.add_system_set(
-            ConditionSet::new()
-                .run_in_state(GameState::InGame)
-                .run_in_state(InGameState::ResolveActions)
-                .with_system(movement)
-                .with_system(fov)
-                // .with_system(unarmed_combat)
-                .with_system(switch_in_game_state!(InGameState::WhosTurn))
-                .into(),
-        );
+        // // InGame && ResolveActions
+        // app.add_system_set(
+        //     ConditionSet::new()
+        //         .run_in_state(GameState::InGame)
+        //         .run_in_state(InGameState::ResolveActions)
+        //         .with_system(movement)
+        //         .with_system(fov)
+        //         // .with_system(unarmed_combat)
+        //         .with_system(switch_in_game_state!(InGameState::WhosTurn))
+        //         .into(),
+        // );
 
-        // After ResolveActions
-        app.add_exit_system_set(
-            InGameState::ResolveActions,
-            SystemSet::new()
-                // .with_system(cull_dead)
-                .with_system(map_indexing)
-                .with_system(fov.after(map_indexing)), // .with_system(map_indexing.after(cull_dead)),
-        );
+        // // After ResolveActions
+        // app.add_exit_system_set(
+        //     InGameState::ResolveActions,
+        //     SystemSet::new()
+        //         // .with_system(cull_dead)
+        //         .with_system(map_indexing)
+        //         .with_system(fov.after(map_indexing)), // .with_system(map_indexing.after(cull_dead)),
+        // );
     }
 }
 
