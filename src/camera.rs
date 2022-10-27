@@ -1,9 +1,9 @@
 use crate::prelude::*;
 
-pub const VIEWPORT_X_OFFSET: i32 = DISPLAY_WIDTH / 2;
-pub const VIEWPORT_Y_OFFSET: i32 = DISPLAY_HEIGHT / 2;
-pub const VIEWPORT_WIDTH: i32 = 100;
-pub const VIEWPORT_HEIGHT: i32 = 100;
+pub const VIEWPORT_X_OFFSET: i32 = SCREEN_WIDTH / 2;
+pub const VIEWPORT_Y_OFFSET: i32 = SCREEN_HEIGHT / 2;
+pub const VIEWPORT_WIDTH: i32 = SCREEN_WIDTH;
+pub const VIEWPORT_HEIGHT: i32 = SCREEN_HEIGHT;
 
 #[derive(Debug, Copy, Clone)]
 pub struct CameraView {
@@ -50,5 +50,53 @@ impl CameraView {
 
     pub fn screen_to_world(&self, mouse_pt: Point) -> Point {
         Point::new(mouse_pt.x + self.viewport.x1, mouse_pt.y + self.viewport.y1)
+    }
+}
+
+fn camera_follow(
+    mut camera: ResMut<CameraView>,
+    player_q: Query<&Position, (With<Player>, Changed<Position>)>,
+) {
+    if let Ok(player_pos) = player_q.get_single() {
+        camera.on_player_move(**player_pos);
+    }
+}
+
+fn zoom_camera(
+    mut keys: ResMut<Input<KeyCode>>,
+    mut camera_q: Query<&mut OrthographicProjection, With<BracketCamera>>,
+) {
+    let key = keys.get_pressed().next().cloned();
+    if let Some(key) = key {
+        let mut proj = camera_q.single_mut();
+
+        if key == KeyCode::Equals || key == KeyCode::Plus {
+            proj.scale -= 0.1;
+        }
+
+        if key == KeyCode::Minus {
+            proj.scale += 0.1;
+        }
+
+        proj.scale = proj.scale.clamp(0.1, 3.0);
+    }
+
+    keys.reset_all();
+}
+
+pub struct CameraPlugin;
+impl Plugin for CameraPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_stage_after(CoreStage::Last, "camera_stage", SystemStage::parallel());
+
+        app.add_system_set_to_stage(
+            "camera_stage",
+            ConditionSet::new()
+                .label("camera_stage")
+                // .run_in_state(GameState::InGame)
+                // .with_system(camera_follow)
+                .with_system(zoom_camera)
+                .into(),
+        );
     }
 }

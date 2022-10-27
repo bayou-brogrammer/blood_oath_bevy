@@ -173,7 +173,7 @@ impl MapBuilder {
 }
 
 fn setup(mut commands: Commands, rng: Res<RandomNumbers>) {
-    let mut builder = BuilderChain::new(grid_2d::Size::new(80, 50), 0, "New Map");
+    let mut builder = BuilderChain::new(grid_2d::Size::new(125, 125), 0, "New Map");
     builder
         .start_with(DLABuilder::insectoid())
         // .start_with(CellularAutomataArchitect::new_with_floor_percent(65))

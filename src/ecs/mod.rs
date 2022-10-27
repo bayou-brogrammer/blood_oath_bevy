@@ -13,10 +13,6 @@ pub use systems::*;
 pub struct EcsPlugin;
 impl Plugin for EcsPlugin {
     fn build(&self, app: &mut App) {
-        app.add_event::<WantsToMove>()
-            .add_event::<WantsToAttack>()
-            .add_event::<WantsToPickupItem>();
-
-        app.add_plugin(SystemsPlugin);
+        app.add_plugin(EventPlugin).add_plugin(SystemsPlugin);
     }
 }

@@ -1,16 +1,17 @@
+use crate::ReflectResource;
+use bevy::reflect::Reflect;
+
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum GameState {
-    Loading,
     Setup,
     InGame,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Default, Debug, Clone, PartialEq, Eq, Hash)]
 pub enum TurnState {
-    WhosTurn,
+    #[default]
     AwaitingInput,
-    ResolveActions,
-    ScoreAIActions,
-    GenerateAIActions,
+    PlayerTurn,
+    EnemyTurn,
     Dead,
 }

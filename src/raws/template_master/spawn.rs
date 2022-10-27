@@ -51,15 +51,13 @@ pub fn spawn_player_from_raw(commands: &mut Commands, coord: Coord) -> Entity {
 
     let stats = create_stats_from_raw_stats(&player_template.stats);
 
-    player
-        .insert_bundle(PlayerBundle::new(
-            coord,
-            player_template.name.clone(),
-            glyph.glyph,
-            glyph.color,
-            stats,
-        ))
-        .insert(WaitingForTurn::default());
+    player.insert_bundle(PlayerBundle::new(
+        coord,
+        player_template.name.clone(),
+        glyph.glyph,
+        glyph.color,
+        stats,
+    ));
 
     player.id()
 }
@@ -82,8 +80,7 @@ pub fn spawn_named_hostile(
         _ => panic!("Hostiles must be spawned at a position"),
     };
 
-    eb.insert_bundle(HostileBundle::new(coord, key, glyph.glyph, glyph.color, stats))
-        .insert(WaitingForTurn::default());
+    eb.insert_bundle(HostileBundle::new(coord, key, glyph.glyph, glyph.color, stats));
 
     match hostile_template.ai {
         AIType::Hostile => {

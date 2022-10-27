@@ -42,7 +42,7 @@ pub fn player_input(
         // reset keyboard, bevys bug when changing states
         keys.reset(key);
 
-        commands.insert_resource(TurnState::ResolveActions);
+        commands.insert_resource(TurnState::PlayerTurn);
     }
 }
 
@@ -57,4 +57,16 @@ fn try_pickup_item(
     }
 
     None
+}
+
+pub struct PlayerPlugin;
+impl Plugin for PlayerPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_system_set(
+            ConditionSet::new()
+                .run_if_resource_equals(TurnState::AwaitingInput)
+                .with_system(player_input)
+                .into(),
+        );
+    }
 }

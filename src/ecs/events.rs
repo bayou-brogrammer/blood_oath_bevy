@@ -11,3 +11,12 @@ pub struct WantsToAttack(pub Entity, pub Entity);
 
 #[derive(Debug)]
 pub struct WantsToPickupItem(pub Entity, pub Entity);
+
+pub struct EventPlugin;
+impl Plugin for EventPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_event::<WantsToMove>()
+            .add_event::<WantsToAttack>()
+            .add_event::<WantsToPickupItem>();
+    }
+}

@@ -8,6 +8,15 @@ macro_rules! switch_in_game_state {
 }
 
 #[macro_export]
+macro_rules! switch_turn_state {
+    ($e:expr) => {
+        |mut commands: Commands| {
+            commands.insert_resource($e);
+        }
+    };
+}
+
+#[macro_export]
 macro_rules! impl_new{
   ($to:ty,$($v:ident: $t:ty),*)  => {
       impl $to {
