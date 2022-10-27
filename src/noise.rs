@@ -1,9 +1,6 @@
 use crate::prelude::*;
-use opensimplex_noise_rs::OpenSimplexNoise;
-
-fn get_id_from_pos(x: i32, y: i32) -> usize {
-    (x + SCREEN_WIDTH * y) as usize
-}
+use noise::{utils::NoiseMap, *};
+use rayon::prelude::{ParallelBridge, ParallelIterator};
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 // Biomes
@@ -26,24 +23,24 @@ pub enum Biomes {
 fn get_biome_color(biome: Biomes) -> (FontCharType, (u8, u8, u8)) {
     match biome {
         Biomes::Grass => (to_cp437('"'), GREEN),
-        Biomes::Dirt => (to_cp437('░'), SANDY_BROWN),
+        Biomes::Dirt => (to_cp437('d'), SADDLEBROWN),
 
         Biomes::Water => (to_cp437('~'), CYAN),
         Biomes::DeepWater => (to_cp437('~'), BLUE),
 
         Biomes::Sand => (to_cp437('░'), YELLOW),
-        Biomes::WetSand => (to_cp437('░'), LIGHT_YELLOW),
+        Biomes::WetSand => (to_cp437('░'), SANDY_BROWN),
 
         Biomes::DarkForest => (to_cp437('¶'), DARKGREEN),
         Biomes::LightForest => (to_cp437('¶'), LIGHTGREEN),
 
         Biomes::Mountain => (to_cp437('^'), SLATEGRAY),
 
-        Biomes::Snow => (to_cp437('░'), WHITE),
+        Biomes::Snow => (to_cp437('s'), WHITE),
     }
 }
 
-pub fn get_biome_at(height: f32, moisture: f32) -> Biomes {
+pub fn get_biome_at(height: f64, moisture: f64) -> Biomes {
     match (height, moisture) {
         (a, _) if a < 0.39 => Biomes::DeepWater,
         (a, _) if a < 0.42 => Biomes::Water,
@@ -66,6 +63,7 @@ pub fn get_biome_at(height: f32, moisture: f32) -> Biomes {
 pub struct NoiseSettings {
     pub octaves: i32,
     pub persistence: f64,
+    pub lacunarity: f64,
 
     pub biome_map_mult: f32,
     pub biome_map_sub: f32,
@@ -74,53 +72,59 @@ pub struct NoiseSettings {
     pub height_map_mult: f32,
     pub height_map_frequency: f64,
 
-    pub gradient_mult: f32,
+    pub gradient_hm_mult: f32,
+
+    pub low: f64,
+    pub high: f64,
 }
 
 impl Default for NoiseSettings {
     fn default() -> Self {
         Self {
-            octaves: 3,
-            persistence: 0.5,
-            gradient_mult: 0.8,
-            biome_map_sub: 0.1,
+            low: 0.4,
+            high: 1.0,
+            octaves: 8,
+            lacunarity: 1.8,
+            persistence: 0.55,
+
+            biome_map_sub: 1.6,
             biome_map_mult: 0.4,
-            height_map_mult: 1.1,
-            biome_map_frequency: 0.007,
-            height_map_frequency: 0.004,
+            biome_map_frequency: 0.02,
+
+            gradient_hm_mult: 0.4,
+            height_map_mult: 0.9,
+            height_map_frequency: 0.03,
         }
     }
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 
-pub struct NoiseMap {
+pub struct InternalNoiseMap {
     pub seed: i64,
-    pub height_map: Vec<f32>,
-    pub biome_map: Vec<f32>,
+    pub height_map: NoiseMap,
+    pub biome_map: NoiseMap,
     pub settings: NoiseSettings,
 }
 
-impl Default for NoiseMap {
+impl Default for InternalNoiseMap {
     fn default() -> Self {
         Self {
             seed: 0,
             settings: NoiseSettings::default(),
-            biome_map: vec![0.0; (SCREEN_WIDTH * SCREEN_HEIGHT) as usize],
-            height_map: vec![0.0; (SCREEN_WIDTH * SCREEN_HEIGHT) as usize],
+            biome_map: NoiseMap::new(SCREEN_WIDTH, SCREEN_HEIGHT),
+            height_map: NoiseMap::new(SCREEN_WIDTH, SCREEN_HEIGHT),
         }
     }
 }
-impl NoiseMap {
+impl InternalNoiseMap {
     #[allow(clippy::too_many_arguments)]
     fn sum_octaves(
         &self,
         num_iterations: i32,
-        point: (i32, i32),
+        point: (usize, usize),
         scale: f64,
-        low: f64,
-        high: f64,
-        noise_fn: impl Fn(f64, f64) -> f64,
+        noise_fn: impl Fn([f64; 2]) -> f64,
     ) -> f64 {
         let mut max_amp = 0.0;
         let mut amp = 1.0;
@@ -128,16 +132,17 @@ impl NoiseMap {
         let mut noise = 0.0;
 
         for _ in 0..num_iterations {
-            noise += noise_fn(point.0 as f64 * freq, point.1 as f64 * freq) * amp;
+            noise += noise_fn([point.0 as f64 * freq, point.1 as f64 * freq]) * amp;
             max_amp += amp;
             amp *= self.settings.persistence;
-            freq *= 2.0;
+            freq *= self.settings.lacunarity;
         }
 
-        (noise / max_amp) * (high - low) / 2.0 + (high + low) / 2.0
+        (noise / max_amp) * (self.settings.high - self.settings.low) / 2.0
+            + (self.settings.high + self.settings.low) / 2.0
     }
-    pub fn generate_gradient(&self) -> Vec<f32> {
-        let mut gradient: Vec<f32> = vec![1.0; (SCREEN_WIDTH * SCREEN_HEIGHT) as usize];
+    pub fn generate_gradient(&self) -> NoiseMap {
+        let mut gradient = NoiseMap::new(SCREEN_WIDTH, SCREEN_HEIGHT);
 
         for x in 0..SCREEN_WIDTH {
             for y in 0..SCREEN_HEIGHT {
@@ -152,35 +157,49 @@ impl NoiseMap {
                 color_value = 1.0 - color_value;
                 color_value = color_value * color_value;
 
-                gradient[get_id_from_pos(x, y)] = match color_value - 0.1 {
-                    x if x > 1.0 => 1.0,
-                    x if x < 0.0 => 0.0,
-                    x => x,
-                };
+                gradient.set_value(
+                    x,
+                    y,
+                    match color_value - 0.1 {
+                        x if x > 1.0 => 1.0,
+                        x if x < 0.0 => 0.0,
+                        x => x as f64,
+                    },
+                );
             }
         }
 
         gradient
     }
 
-    pub fn generate_noise_map(&mut self, scale: f64) -> Vec<f32> {
-        let noise_generator = OpenSimplexNoise::new(Some(self.seed));
+    pub fn generate_noise_map(&mut self, scale: f64) -> NoiseMap {
+        let perlin = noise::Perlin::new(self.seed as u32);
+        let open = noise::OpenSimplex::new(self.seed as u32);
+        let value = noise::Value::new(self.seed as u32);
+        let billow = noise::Billow::<Perlin>::new(self.seed as u32);
 
-        let mut noise_map = vec![0.0; (SCREEN_WIDTH * SCREEN_HEIGHT) as usize];
+        let mut noise_map = NoiseMap::new(SCREEN_WIDTH as usize, SCREEN_HEIGHT as usize);
+
         for x in 0..SCREEN_WIDTH {
             for y in 0..SCREEN_HEIGHT {
-                let val = self.sum_octaves(
-                    self.settings.octaves,
-                    (x, y),
-                    scale,
-                    0.0,
-                    1.0,
-                    |x, y| noise_generator.eval_2d(x, y),
-                );
+                let val = self.sum_octaves(self.settings.octaves, (x, y), scale, |[x, y]| {
+                    perlin.get([x, y])
+                });
 
-                noise_map[get_id_from_pos(x, y)] = val as f32;
+                noise_map.set_value(x as usize, y as usize, val);
             }
         }
+
+        let mut hmap = ndarray::Array2::<f64>::zeros((SCREEN_WIDTH, SCREEN_HEIGHT));
+        hmap.outer_iter_mut().enumerate().par_bridge().for_each(|(r, mut the_row)| {
+            the_row += &ndarray::Array1::from_shape_fn(SCREEN_HEIGHT, |c| {
+                self.sum_octaves(self.settings.octaves, (r, c), scale, |[x, y]| {
+                    perlin.get([x, y])
+                })
+            });
+        });
+
+        println!("hmap: {:?}", hmap);
 
         noise_map
     }
@@ -192,36 +211,43 @@ impl NoiseMap {
 
         for x in 0..SCREEN_WIDTH {
             for y in 0..SCREEN_HEIGHT {
-                self.height_map[get_id_from_pos(x, y)] =
-                    self.height_map[get_id_from_pos(x, y)] * self.settings.height_map_mult
-                        - gradient[get_id_from_pos(x, y)] * self.settings.gradient_mult;
+                let hv = self.height_map.get_value(x, y)
+                    * self.settings.height_map_mult as f64
+                    - gradient.get_value(x, y) * self.settings.gradient_hm_mult as f64;
 
-                self.biome_map[get_id_from_pos(x, y)] = self.biome_map[get_id_from_pos(x, y)]
-                    - (self.settings.biome_map_sub - gradient[get_id_from_pos(x, y)])
-                        * self.settings.biome_map_mult;
+                self.height_map.set_value(x, y, hv);
 
-                if self.height_map[get_id_from_pos(x, y)] < 0.0 {
-                    self.height_map[get_id_from_pos(x, y)] = 0.0;
-                }
-                if self.biome_map[get_id_from_pos(x, y)] < 0.0 {
-                    self.biome_map[get_id_from_pos(x, y)] = 0.0;
-                }
+                let bv = self.biome_map.get_value(x, y)
+                    - (self.settings.biome_map_sub as f64 - gradient.get_value(x, y))
+                        * self.settings.biome_map_mult as f64;
+                self.biome_map.set_value(x, y, bv);
+
+                // if self.height_map.get_value(x, y) < 0.0 {
+                //     self.height_map.set_value(x, y, 0.0);
+                // }
+                // if self.biome_map.get_value(x, y) < 0.0 {
+                //     self.biome_map.set_value(x, y, 0.0);
+                // }
             }
         }
+
+        self.height_map.write_to_file("HeightMap.png");
+
+        self.biome_map.write_to_file("Biome_map.png");
     }
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 
-pub fn render_noise(ctx: Res<BracketContext>, nm: Res<NoiseMap>) {
+pub fn render_noise(ctx: Res<BracketContext>, nm: Res<InternalNoiseMap>) {
     for x in 0..SCREEN_WIDTH {
         for y in 0..SCREEN_HEIGHT {
-            let height = nm.height_map[get_id_from_pos(x, y)];
-            let moisture = nm.biome_map[get_id_from_pos(x, y)];
+            let height = nm.height_map.get_value(x, y);
+            let moisture = nm.biome_map.get_value(x, y);
 
             let biome = get_biome_at(height, moisture);
             let (glyph, color) = get_biome_color(biome);
-            ctx.set(x, y, color, BLACK, glyph);
+            ctx.set(x as i32, y as i32, color, BLACK, glyph);
         }
     }
 }

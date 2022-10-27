@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
 // Screens
-pub const SCREEN_WIDTH: i32 = 320;
-pub const SCREEN_HEIGHT: i32 = 200;
+pub const SCREEN_WIDTH: usize = 120;
+pub const SCREEN_HEIGHT: usize = 75;
 
 fn setup_bterm() -> BTermBuilder {
     BTermBuilder::empty()
@@ -12,7 +12,7 @@ fn setup_bterm() -> BTermBuilder {
         // .with_font("terminal12x12.png", 16, 16, (12.0, 12.0))
         // .with_font("terminal16x16.png", 16, 16, (16.0, 16.0))
         // .with_font("vga8x16.png", 16, 16, (8.0, 16.0))
-        .with_simple_console(0, SCREEN_WIDTH, SCREEN_HEIGHT)
+        .with_simple_console(0, SCREEN_WIDTH as i32, SCREEN_HEIGHT as i32)
         .with_background(true)
 }
 

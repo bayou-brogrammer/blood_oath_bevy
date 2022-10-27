@@ -48,29 +48,32 @@ bracket-pathfinding = { git = "https://github.com/lecoqjacob/bracket-lib", branc
 bracket-rex         = { git = "https://github.com/lecoqjacob/bracket-lib", branch = "custom" }
 
 # UI
-bevy_egui           = "0.16"
+bevy_egui = "0.16"
 
 # Utility
-bitvec        = { version = "1", features = ["serde"] }
-lazy_static   = "1"
-parking_lot   = "0.12"
-once_cell = "1.0"
+bitvec      = { version = "1", features = ["serde"] }
+lazy_static = "1"
+once_cell   = "1.0"
+parking_lot = "0.12"
 
-colored   = "2"
-direction = { version = "0.18", features = ["serialize"] }
-grid_2d   = { version = "0.15", features = ["serialize"] }
+colored              = "2"
+direction            = { version = "0.18", features = ["serialize"] }
+grid_2d              = { version = "0.15", features = ["serialize"] }
 opensimplex_noise_rs = "0.3.0"
 
 # Serialization
-ron       = "0.8"
-serde         = { version = "1", features = ["derive"] }
+ron   = "0.8"
+serde = { version = "1", features = ["derive"] }
 
 # Utility
 clap = { version = "4", features = ["derive"] }
 
-bevy_pancam="0.6.1"
-noisy_bevy="0.1.0"
-bevy-inspector-egui="0.13.0"
+bevy-inspector-egui = "0.13.0"
+bevy_pancam         = "0.6.1"
+indicatif           = "0.17"
+ndarray             = { version = "0.15", features = ["rayon"] }
+noise               = { version = "0.8", features = ["images"] }
+rayon               = "1"
 
 # keep the following in sync with Bevy's dependencies
 image = { version = "0.24", default-features = false }
