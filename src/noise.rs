@@ -1,6 +1,5 @@
 use crate::prelude::*;
 use noise::{utils::NoiseMap, *};
-use rayon::prelude::{ParallelBridge, ParallelIterator};
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 // Biomes
@@ -65,14 +64,13 @@ pub struct NoiseSettings {
     pub persistence: f64,
     pub lacunarity: f64,
 
-    pub biome_map_mult: f32,
     pub biome_map_sub: f32,
     pub biome_map_frequency: f64,
+    pub biome_map_gradient_mult: f32,
 
     pub height_map_mult: f32,
     pub height_map_frequency: f64,
-
-    pub gradient_hm_mult: f32,
+    pub height_map_gradient_mult: f32,
 
     pub low: f64,
     pub high: f64,
@@ -88,12 +86,12 @@ impl Default for NoiseSettings {
             persistence: 0.55,
 
             biome_map_sub: 1.6,
-            biome_map_mult: 0.4,
             biome_map_frequency: 0.02,
+            biome_map_gradient_mult: 0.4,
 
-            gradient_hm_mult: 0.4,
             height_map_mult: 0.9,
             height_map_frequency: 0.03,
+            height_map_gradient_mult: 0.4,
         }
     }
 }
@@ -141,6 +139,7 @@ impl InternalNoiseMap {
         (noise / max_amp) * (self.settings.high - self.settings.low) / 2.0
             + (self.settings.high + self.settings.low) / 2.0
     }
+
     pub fn generate_gradient(&self) -> NoiseMap {
         let mut gradient = NoiseMap::new(SCREEN_WIDTH, SCREEN_HEIGHT);
 
@@ -174,12 +173,11 @@ impl InternalNoiseMap {
 
     pub fn generate_noise_map(&mut self, scale: f64) -> NoiseMap {
         let perlin = noise::Perlin::new(self.seed as u32);
-        let open = noise::OpenSimplex::new(self.seed as u32);
-        let value = noise::Value::new(self.seed as u32);
-        let billow = noise::Billow::<Perlin>::new(self.seed as u32);
+        // let open = noise::OpenSimplex::new(self.seed as u32);
+        // let value = noise::Value::new(self.seed as u32);
+        // let billow = noise::Billow::<Perlin>::new(self.seed as u32);
 
         let mut noise_map = NoiseMap::new(SCREEN_WIDTH as usize, SCREEN_HEIGHT as usize);
-
         for x in 0..SCREEN_WIDTH {
             for y in 0..SCREEN_HEIGHT {
                 let val = self.sum_octaves(self.settings.octaves, (x, y), scale, |[x, y]| {
@@ -189,17 +187,6 @@ impl InternalNoiseMap {
                 noise_map.set_value(x as usize, y as usize, val);
             }
         }
-
-        let mut hmap = ndarray::Array2::<f64>::zeros((SCREEN_WIDTH, SCREEN_HEIGHT));
-        hmap.outer_iter_mut().enumerate().par_bridge().for_each(|(r, mut the_row)| {
-            the_row += &ndarray::Array1::from_shape_fn(SCREEN_HEIGHT, |c| {
-                self.sum_octaves(self.settings.octaves, (r, c), scale, |[x, y]| {
-                    perlin.get([x, y])
-                })
-            });
-        });
-
-        println!("hmap: {:?}", hmap);
 
         noise_map
     }
@@ -211,29 +198,30 @@ impl InternalNoiseMap {
 
         for x in 0..SCREEN_WIDTH {
             for y in 0..SCREEN_HEIGHT {
-                let hv = self.height_map.get_value(x, y)
-                    * self.settings.height_map_mult as f64
-                    - gradient.get_value(x, y) * self.settings.gradient_hm_mult as f64;
+                self.height_map.set_value(
+                    x,
+                    y,
+                    self.height_map.get_value(x, y) * self.settings.height_map_mult as f64
+                        - gradient.get_value(x, y)
+                            * self.settings.height_map_gradient_mult as f64,
+                );
 
-                self.height_map.set_value(x, y, hv);
+                self.biome_map.set_value(
+                    x,
+                    y,
+                    self.biome_map.get_value(x, y)
+                        - (self.settings.biome_map_sub as f64 - gradient.get_value(x, y))
+                            * self.settings.biome_map_gradient_mult as f64,
+                );
 
-                let bv = self.biome_map.get_value(x, y)
-                    - (self.settings.biome_map_sub as f64 - gradient.get_value(x, y))
-                        * self.settings.biome_map_mult as f64;
-                self.biome_map.set_value(x, y, bv);
-
-                // if self.height_map.get_value(x, y) < 0.0 {
-                //     self.height_map.set_value(x, y, 0.0);
-                // }
-                // if self.biome_map.get_value(x, y) < 0.0 {
-                //     self.biome_map.set_value(x, y, 0.0);
-                // }
+                if self.height_map.get_value(x, y) < 0.0 {
+                    self.height_map.set_value(x, y, 0.0);
+                }
+                if self.biome_map.get_value(x, y) < 0.0 {
+                    self.biome_map.set_value(x, y, 0.0);
+                }
             }
         }
-
-        self.height_map.write_to_file("HeightMap.png");
-
-        self.biome_map.write_to_file("Biome_map.png");
     }
 }
 

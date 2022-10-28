@@ -34,8 +34,8 @@ pub fn noise_generator(
         );
 
         ui.add(
-            egui::Slider::new(&mut map.settings.gradient_hm_mult, 0.0..=5.0)
-                .text("Gradient HM Multi"),
+            egui::Slider::new(&mut map.settings.height_map_gradient_mult, 0.0..=5.0)
+                .text("Height Map Gradient Multi"),
         );
 
         ui.add(
@@ -43,8 +43,8 @@ pub fn noise_generator(
                 .text("Biome Map Sub"),
         );
         ui.add(
-            egui::Slider::new(&mut map.settings.biome_map_mult, 0.0..=5.0)
-                .text("Gradient Biome Map Multi"),
+            egui::Slider::new(&mut map.settings.biome_map_gradient_mult, 0.0..=5.0)
+                .text("Biome Map Gradient Multi"),
         );
 
         ui.add(egui::Slider::new(&mut map.settings.low, 0.0..=10.0).text("Low"));
