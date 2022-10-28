@@ -38,6 +38,7 @@ pub fn noise_generator(
                 .text("Gradient HM Multi"),
         );
 
+        //////////////////////////////////////////////////////////////////////////////
         ui.add(
             egui::Slider::new(&mut map.settings.biome_map_sub, 0.0..=5.0)
                 .text("Biome Map Sub"),
@@ -47,8 +48,13 @@ pub fn noise_generator(
                 .text("Gradient Biome Map Multi"),
         );
 
+        //////////////////////////////////////////////////////////////////////////////
+
         ui.add(egui::Slider::new(&mut map.settings.low, 0.0..=10.0).text("Low"));
         ui.add(egui::Slider::new(&mut map.settings.high, 0.0..=10.0).text("High"));
+
+        //////////////////////////////////////////////////////////////////////////////
+        ui.add(egui::Checkbox::new(&mut map.settings.set_zero, "Set Zero"));
 
         if ui.button("Reseed").clicked() {
             map.seed = rng.rand::<i64>();
