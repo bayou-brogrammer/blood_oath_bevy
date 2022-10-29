@@ -9,54 +9,85 @@ pub fn noise_generator(
     mut map: ResMut<InternalNoiseMap>,
     mut egui: ResMut<EguiContext>,
 ) {
-    let base_settings = map.settings.clone();
+    // let base_settings = map.settings.clone();
+
+    let mut changed = false;
 
     egui::Window::new("Noising").show(egui.ctx_mut(), |ui| {
-        ui.add(egui::Slider::new(&mut map.settings.octaves, 0..=20).text("Octaves"));
-        ui.add(
-            egui::Slider::new(&mut map.settings.persistence, 0.0..=20.0).text("Persistence"),
-        );
-        ui.add(egui::Slider::new(&mut map.settings.lacunarity, 0.0..=20.0).text("Lacunarity"));
+        changed |= ui
+            .add(egui::Slider::new(&mut map.settings.octaves, 0..=20).text("Octaves"))
+            .changed();
 
-        ui.add(
-            egui::Slider::new(&mut map.settings.biome_map_frequency, 0.0..=1.0)
-                .text("Biome Map Scale"),
-        );
-        ui.add(
-            egui::Slider::new(&mut map.settings.height_map_frequency, 0.0..=1.0)
-                .text("Height Map Scale"),
-        );
+        changed |= ui
+            .add(
+                egui::Slider::new(&mut map.settings.persistence, 0.0..=20.0)
+                    .text("Persistence"),
+            )
+            .changed();
+        changed |= ui
+            .add(
+                egui::Slider::new(&mut map.settings.lacunarity, 0.0..=20.0).text("Lacunarity"),
+            )
+            .changed();
+
+        changed |= ui
+            .add(
+                egui::Slider::new(&mut map.settings.biome_map_frequency, 0.0..=1.0)
+                    .text("Biome Map Scale"),
+            )
+            .changed();
+        changed |= ui
+            .add(
+                egui::Slider::new(&mut map.settings.height_map_frequency, 0.0..=1.0)
+                    .text("Height Map Scale"),
+            )
+            .changed();
 
         //////////////////////////////////////////////////////////////////////////////
-        ui.add(
-            egui::Slider::new(&mut map.settings.height_map_mult, 0.0..=5.0)
-                .text("Height Map Multi"),
-        );
+        changed |= ui
+            .add(
+                egui::Slider::new(&mut map.settings.height_map_mult, 0.0..=5.0)
+                    .text("Height Map Multi"),
+            )
+            .changed();
 
-        ui.add(
-            egui::Slider::new(&mut map.settings.height_map_gradient_mult, 0.0..=5.0)
-                .text("Height Map Gradient Multi"),
-        );
+        changed |= ui
+            .add(
+                egui::Slider::new(&mut map.settings.height_map_gradient_mult, 0.0..=5.0)
+                    .text("Height Map Gradient Multi"),
+            )
+            .changed();
 
-        ui.add(
-            egui::Slider::new(&mut map.settings.biome_map_sub, 0.0..=5.0)
-                .text("Biome Map Sub"),
-        );
-        ui.add(
-            egui::Slider::new(&mut map.settings.biome_map_gradient_mult, 0.0..=5.0)
-                .text("Biome Map Gradient Multi"),
-        );
+        changed |= ui
+            .add(
+                egui::Slider::new(&mut map.settings.biome_map_sub, 0.0..=5.0)
+                    .text("Biome Map Sub"),
+            )
+            .changed();
+        changed |= ui
+            .add(
+                egui::Slider::new(&mut map.settings.biome_map_gradient_mult, 0.0..=5.0)
+                    .text("Biome Map Gradient Multi"),
+            )
+            .changed();
 
-        ui.add(egui::Slider::new(&mut map.settings.low, 0.0..=10.0).text("Low"));
-        ui.add(egui::Slider::new(&mut map.settings.high, 0.0..=10.0).text("High"));
+        changed |=
+            ui.add(egui::Slider::new(&mut map.settings.low, 0.0..=10.0).text("Low")).changed();
+        changed |= ui
+            .add(egui::Slider::new(&mut map.settings.high, 0.0..=10.0).text("High"))
+            .changed();
 
-        if ui.button("Reseed").clicked() {
-            map.seed = rng.rand::<i64>();
-            map.generate_maps();
-        }
+        ui.horizontal(|ui| {
+            ui.label(format!("Seed: {}", map.seed));
+
+            if ui.button("Reseed").clicked() {
+                map.seed = rng.next_u64();
+                changed |= true;
+            }
+        });
     });
 
-    if base_settings != map.settings {
+    if changed {
         map.generate_maps();
     }
 }
