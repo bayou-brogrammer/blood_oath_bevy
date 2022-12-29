@@ -3,13 +3,14 @@ use grid_2d::Grid;
 use grid_2d::Size;
 
 mod bitgrid;
-mod map_builder;
+// mod map_builder;
 mod spatial;
 mod themes;
 mod tile;
 
 pub use bitgrid::*;
-pub use map_builder::*;
+use sark_grids::Size2d;
+// pub use map_builder::*;
 pub use spatial::*;
 pub use themes::*;
 pub use tile::*;
@@ -46,7 +47,7 @@ impl TileMap {
             opaque: BitGrid::new(size),
             blocked: BitGrid::new(size),
             tile_content: vec![Vec::new(); map_tile_count],
-            tiles: Grid::new_fn(size, |_| TileType::Wall),
+            tiles: Grid::new_fn(size, |_| TileType::Water),
         }
     }
 

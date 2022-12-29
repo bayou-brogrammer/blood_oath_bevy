@@ -1,8 +1,10 @@
+use std::default;
+
 use super::*;
 
 pub const TILE_SIZE: f32 = 8.0;
 
-#[derive(Debug, PartialEq, Eq, Hash, Copy, Clone, Serialize, Deserialize)]
+#[derive(Default, Debug, PartialEq, Eq, Hash, Copy, Clone, Serialize, Deserialize)]
 pub enum TileType {
     DownStairs,
     UpStairs,
@@ -10,11 +12,22 @@ pub enum TileType {
     Floor,
     Wall,
     Door,
+
+    #[default]
+    DeepWater,
+    Water,
+    Sand,
+    Dirt,
+    Grass,
+
+    Mountain,
+    Snow,
 }
 
 impl TileType {
     pub fn is_walkable(&self) -> bool {
-        matches!(self, TileType::Floor | TileType::DownStairs | TileType::UpStairs)
+        use TileType::*;
+        matches!(self, Floor | DownStairs | UpStairs | Water | Sand | Grass | Dirt | Snow)
     }
 
     pub fn is_opaque(&self) -> bool {

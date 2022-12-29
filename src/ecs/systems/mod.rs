@@ -30,7 +30,7 @@ impl Plugin for SystemsPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugin(StartupIngameSystems)
             .add_plugin(PlayerPlugin)
-            .add_plugin(RenderingPlugin)
+            // .add_plugin(RenderingPlugin)
             .add_plugin(InventoryPlugin);
 
         app.add_system_set_to_stage(

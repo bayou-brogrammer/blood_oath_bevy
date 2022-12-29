@@ -4,11 +4,11 @@ pub mod debug;
 
 mod bterm;
 mod camera;
-// mod ecs;
+mod ecs;
 mod noise;
-// mod raws;
-// mod spawner;
-// mod tilemap;
+mod raws;
+mod spawner;
+mod tilemap;
 mod util;
 
 mod prelude {
@@ -25,14 +25,15 @@ mod prelude {
     pub use bracket_pathfinding::prelude::*;
     pub use direction::*;
     pub use grid_2d::*;
+    pub use semi_grid::prelude::*;
 
     pub use crate::bterm::*;
     pub use crate::camera::*;
-    // pub use crate::ecs::*;
+    pub use crate::ecs::*;
     pub use crate::noise::*;
-    // pub use crate::raws::*;
-    // pub use crate::spawner::*;
-    // pub use crate::tilemap::*;
+    pub use crate::raws::*;
+    pub use crate::spawner::*;
+    pub use crate::tilemap::*;
     pub use crate::util::*;
     pub use crate::{impl_default, impl_new, switch_in_game_state, switch_turn_state};
 
@@ -57,7 +58,7 @@ use bevy::render::texture::ImageSettings;
 pub use prelude::*;
 
 pub fn main() {
-    // raws::load_raws();
+    raws::load_raws();
 
     let mut app = App::new();
 
@@ -79,16 +80,17 @@ pub fn main() {
     });
 
     // Game States Setup
-    // app.add_loopless_state(GameState::Setup);
-    // app.insert_resource(TurnState::AwaitingInput);
+    app.add_loopless_state(GameState::InGame);
+    app.insert_resource(TurnState::AwaitingInput);
 
     // app.add_plugin(bterm::BTermPlugin)
     //     .add_plugin(tilemap::MapBuilderPlugin)
     //     .add_plugin(spawner::SpawnerPlugin)
-    //     .add_plugin(ecs::EcsPlugin)
     //     .add_plugin(debug::DebugPlugin);
 
-    app.add_plugin(bterm::BTermPlugin).add_plugin(debug::DebugPlugin);
+    app.add_plugin(bterm::BTermPlugin)
+        .add_plugin(debug::DebugPlugin)
+        .add_plugin(ecs::EcsPlugin);
 
     #[cfg(feature = "debug-graph")]
     {
@@ -96,13 +98,9 @@ pub fn main() {
         return;
     }
 
-    app.add_startup_system(setup).add_plugin(CameraPlugin).add_system(render_noise);
+    app.add_startup_system(setup.run_if_resource_exists()).add_plugin(CameraPlugin).add_system(render_noise);
 
     app.run();
 }
 
-pub fn setup(mut commands: Commands) {
-    let mut nm = InternalNoiseMap::default();
-    nm.generate_maps();
-    commands.insert_resource(nm);
-}
+fn setup() {}

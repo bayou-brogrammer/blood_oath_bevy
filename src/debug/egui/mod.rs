@@ -5,6 +5,7 @@ use bevy::diagnostic::{
 use bevy_egui::*;
 
 pub fn noise_generator(
+    mut commands: Commands,
     rng: Res<RandomNumbers>,
     mut map: ResMut<InternalNoiseMap>,
     mut egui: ResMut<EguiContext>,
@@ -30,12 +31,9 @@ pub fn noise_generator(
             )
             .changed();
 
-        changed |= ui
-            .add(
-                egui::Slider::new(&mut map.settings.biome_map_frequency, 0.0..=1.0)
-                    .text("Biome Map Scale"),
-            )
-            .changed();
+        //////////////////////////////////////////////////////////////////////////////
+        // Height Map
+        //////////////////////////////////////////////////////////////////////////////
         changed |= ui
             .add(
                 egui::Slider::new(&mut map.settings.height_map_frequency, 0.0..=1.0)
@@ -43,7 +41,6 @@ pub fn noise_generator(
             )
             .changed();
 
-        //////////////////////////////////////////////////////////////////////////////
         changed |= ui
             .add(
                 egui::Slider::new(&mut map.settings.height_map_mult, 0.0..=5.0)
@@ -58,15 +55,25 @@ pub fn noise_generator(
             )
             .changed();
 
+        //////////////////////////////////////////////////////////////////////////////
+        // Water Map
+        //////////////////////////////////////////////////////////////////////////////
         changed |= ui
             .add(
-                egui::Slider::new(&mut map.settings.biome_map_sub, 0.0..=5.0)
+                egui::Slider::new(&mut map.settings.moisture_map_frequency, 0.0..=1.0)
+                    .text("Biome Map Scale"),
+            )
+            .changed();
+
+        changed |= ui
+            .add(
+                egui::Slider::new(&mut map.settings.moisture_map_sub, 0.0..=5.0)
                     .text("Biome Map Sub"),
             )
             .changed();
         changed |= ui
             .add(
-                egui::Slider::new(&mut map.settings.biome_map_gradient_mult, 0.0..=5.0)
+                egui::Slider::new(&mut map.settings.moisture_map_gradient_mult, 0.0..=5.0)
                     .text("Biome Map Gradient Multi"),
             )
             .changed();
@@ -88,7 +95,7 @@ pub fn noise_generator(
     });
 
     if changed {
-        map.generate_maps();
+        commands.insert_resource(map.generate_maps());
     }
 }
 

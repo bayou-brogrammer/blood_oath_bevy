@@ -1,6 +1,6 @@
 RawPlayer(
     name: "Jabal",
-    vision_range: 11,
+    vision_range: 20,
     stats: RawStats(
         max_hp: Some(100),
         base_armor: Some(0),

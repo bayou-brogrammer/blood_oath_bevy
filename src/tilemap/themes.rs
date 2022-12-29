@@ -37,6 +37,17 @@ impl TileType {
             TileType::UpStairs => (to_cp437('<'), RGB::named(CYAN), RGB::named(BLACK)),
             TileType::Floor => (to_cp437('.'), RGB::named(WHITE), RGB::named(BLACK)),
             TileType::Door => (to_cp437('+'), RGB::named(CHOCOLATE), RGB::named(BLACK)),
+            TileType::Grass => (to_cp437('"'), RGB::named(GREEN), RGB::named(BLACK)),
+            TileType::Dirt => (to_cp437('d'), RGB::named(SADDLEBROWN), RGB::named(BLACK)),
+
+            TileType::Water => (to_cp437('~'), RGB::named(CYAN), RGB::named(BLACK)),
+            TileType::DeepWater => (to_cp437('~'), RGB::named(BLUE), RGB::named(BLACK)),
+
+            TileType::Sand => (to_cp437('░'), RGB::named(YELLOW), RGB::named(BLACK)),
+
+            TileType::Mountain => (to_cp437('^'), RGB::named(SLATEGRAY), RGB::named(BLACK)),
+
+            TileType::Snow => (to_cp437('s'), RGB::named(WHITE), RGB::named(BLACK)),
         };
 
         (glyph, ColorPair::new(fg, bg))

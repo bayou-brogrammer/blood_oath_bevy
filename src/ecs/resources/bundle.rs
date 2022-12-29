@@ -44,7 +44,7 @@ impl PlayerBundle {
         Self {
             stats,
             tag: Player,
-            fov: FieldOfView::new(8),
+            fov: FieldOfView::new(100),
             render: RenderableBundle::new(name, coord, glyph, color, RenderOrder::Actor),
         }
     }
